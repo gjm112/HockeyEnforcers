@@ -1,0 +1,65 @@
+---
+title: "Hockey Enforcer EDA"
+author: "Gregory J. Matthews"
+date: "2023-05-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(tidyverse)
+gen_JAMA <- read.csv("/Users/gregorymatthews/Dropbox/hockeyEnforcers/JAMA NHL Data/General-Table 1.csv")
+death_JAMA <- read.csv("/Users/gregorymatthews/Dropbox/hockeyEnforcers/JAMA NHL Data/Deaths-Table 1.csv")
+
+#This is the number they get in the paper.  
+gen_JAMA %>% filter(X1st.Season.Corrected >= 1967) %>% nrow()
+```
+This 6039 matches the number from the JAMA paper.  
+
+
+```{r}
+
+# library(XML)
+# library(RCurl)
+# deaths <- list()
+# year <- "2023"
+# for (year in 1918:2023){print(year)
+# Sys.sleep(10)
+# tt <- getURL(paste0("https://www.hockey-reference.com/leagues/NHL_",year,"_deaths.html"))
+# deaths[[year]] <- readHTMLTable(tt)$deaths
+# }
+
+
+
+#dead <- do.call(rbind, deaths)
+#write.csv(dead, file = "/Users/gregorymatthews/Dropbox/hockeyEnforcers/deaths.csv")
+dead <- read.csv("/Users/gregorymatthews/Dropbox/hockeyEnforcers/deaths.csv")
+dead <- dead %>% filter(From >= 1967 & Name != "Name")
+
+table(dead$Name %in% gen_JAMA$Player)
+#Players in my list of dead who aren't in the JAMA data.  
+dead[!dead$Name %in% gen_JAMA$Player,]
+
+```
+
+
+There are 52 people I have a death record for that aren't in the JAMA data.  Some of this is due to weird characters and so there is no match.  But others appears to be just missing.  Pelle Lindberg and Roy Edwards are examples where I have a death record but I don't have their record in the JAMA data.  Any thoughts?  
+
+
+There are 4 people in the JAMA death data that I can't match in the dead data that I scraped.  Some of this is due to shortened versions of names.  Others are due to weird characters.
+```{r}
+death_JAMA[!death_JAMA$Enforcers %in% dead$Name,]
+
+
+#This is a Bob vs Robert situation.  
+dead[dead$Name %in% c("Bob Sullivan"),]
+#This is Rick vs Richard.
+dead[dead$Name %in% c("Rick Martin"),]
+#Some of this is because of weird characters.  
+dead[c(73,200),]
+```
+
