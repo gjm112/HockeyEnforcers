@@ -1,5 +1,6 @@
-gen_JAMA <- read.csv("C://Users//Leigh//OneDrive//Documents//LUC Documents//JAMA cleaning//General-Table 1.csv")
-death_JAMA <- read.csv("C://Users//Leigh//OneDrive//Documents//LUC Documents//JAMA cleaning//Deaths-Table 1.csv")
+library(tidyverse)
+gen_JAMA <- read.csv("/Users/gregorymatthews/Dropbox/HockeyEnforcersGit/JAMA NHL Data/General-Table 1.csv")
+death_JAMA <- read.csv("/Users/gregorymatthews/Dropbox/HockeyEnforcersGit/JAMA NHL Data/Deaths-Table 1.csv")
 
 #This is the number they get in the paper.  
 gen_JAMA %>% filter(X1st.Season.Corrected >= 1967) %>% nrow()
