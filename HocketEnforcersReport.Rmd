@@ -1,9 +1,30 @@
+---
+title: "Hockey Enforcers"
+author: "Gregory J. Matthews"
+date: "2023-06-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#Reading in the raw data from the paper.  
 library(tidyverse)
 gen_JAMA <- read.csv("/Users/gregorymatthews/Dropbox/HockeyEnforcersGit/JAMA NHL Data/General-Table 1.csv")
 death_JAMA <- read.csv("/Users/gregorymatthews/Dropbox/HockeyEnforcersGit/JAMA NHL Data/Deaths-Table 1.csv")
+```
 
+This is the exact number of players that the paper cites.  
+```{r}
 #This is the number they get in the paper.  
 gen_JAMA %>% filter(X1st.Season.Corrected >= 1967) %>% nrow()
+```
+
+Webscraping hockey deths from hockey-reference.com
+```{r}
+#URL: https://www.hockey-reference.com/leagues/NHL_2019_deaths.html
 # library(XML)
 # library(RCurl)
 # deaths <- list()
@@ -13,24 +34,29 @@ gen_JAMA %>% filter(X1st.Season.Corrected >= 1967) %>% nrow()
 # tt <- getURL(paste0("https://www.hockey-reference.com/leagues/NHL_",year,"_deaths.html"))
 # deaths[[year]] <- readHTMLTable(tt)$deaths
 # }
-"https://www.hockey-reference.com/leagues/NHL_2019_deaths.html"
+#"https://www.hockey-reference.com/leagues/NHL_2019_deaths.html"
 
 
 
 #dead <- do.call(rbind, deaths)
 #write.csv(dead, file = "/Users/gregorymatthews/Dropbox/hockeyEnforcers/deaths.csv")
+```
+
+Loading the hockey deaths
+```{r}
 dead <- read.csv("/Users/gregorymatthews/Dropbox/HockeyEnforcersGit/deaths.csv")
+#Filtering for players who started in or after 1967.  
 dead <- dead %>% filter(From >= 1967 & Name != "Name")
 
-table(dead$Name %in% gen_JAMA$Player)
-dead[!dead$Name %in% gen_JAMA$Player,]
-
-
-tomatch = data.frame(dead$Name[!dead$Name %in% gen_JAMA$Player])
+#table(dead$Name %in% gen_JAMA$Player)
+#dead[!dead$Name %in% gen_JAMA$Player,]
+#tomatch = data.frame(dead$Name[!dead$Name %in% gen_JAMA$Player])
 library(dplyr)
 library(stringr)
+```
 
-
+Cleaning the data so that we can merge all the death data onto the player data.  
+```{r}
 # Pelle Lindbergh -> that was his real name, no other spelling, not sure about this one
 dead$Name[dead$Name == 'Lars-Erik SjÃ¶berg'] <- 'Lars Sjoberg'
 dead$Name[dead$Name == 'BjÃ¸rn Skaare'] <- 'Bjorn Skaare'
@@ -83,11 +109,10 @@ dead$Name[dead$Name == 'Greg Tebbutt'] <- 'Gregory Tebbutt'
 #Mike Blake -> Michael Wilmer Blake, matched by birthday, not in JAMA
 dead$Name[dead$Name == 'Petr KlÃ­ma'] <- 'Petr Klima'
 dead$Name[dead$Name == 'BÃ¶rje Salming'] <- 'Borje Salming'
-
-#gen_JAMA %>% filter(str_detect(Player, '')) %>% select(Player)
-#death_JAMA$Enforcers[!death_JAMA$Enforcers %in% dead$Name]
-#These names are amazing! : dead$Name[dead$Name %in% gen_JAMA$Player]
-#Merge 
+```
+Merging on death data. 
+```{r}
+#Dataprep and Merge 
 library(tidyverse)
 gen_JAMA$GP <- as.numeric(gsub(",","",gen_JAMA$GP))
 gen_JAMA$PIM <- as.numeric(gsub(",","",gen_JAMA$PIM))
@@ -99,7 +124,9 @@ dat <- gen_JAMA %>% filter(X1st.Season.Corrected >= 1967) %>% left_join(select(d
 
 #All these goalies.
 dead$Name[!dead$Name %in% gen_JAMA$Player]
+```
 
+```{r}
 dat <- dat %>% mutate(dead = !is.na(Death.Date), 
                       DOB = as.Date(DOB), 
                       Death.Date = as.Date(Death.Date))
@@ -188,3 +215,5 @@ ggplot(aes(x = Total.Fights, y = age, col = dead), data = dat[dat$Total.Fights <
 
 
 
+
+```
