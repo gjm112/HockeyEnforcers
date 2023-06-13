@@ -127,9 +127,11 @@ dead$Name[!dead$Name %in% gen_JAMA$Player]
 ```
 
 ```{r}
+#Dataprep
 dat <- dat %>% mutate(dead = !is.na(Death.Date), 
                       DOB = as.Date(DOB), 
                       Death.Date = as.Date(Death.Date))
+#I'm using the date of the latest death date as the censoring time: May 7, 2023
 dat$Death.Date[!dat$dead] <- as.Date("2023-05-07")
 dat$age <- (dat$Death.Date - dat$DOB)/365
 dat$Ht <- as.numeric(dat$Ht)
@@ -142,75 +144,209 @@ dat$Ctry2 <- as.factor(as.character(dat$Ctry2))
 dat$EF <- dat$Total.Fights>50
 
 dat <- dat %>% filter(!is.na(Ht))
+```
 
 
+```{r}
 library(survival)
+#Defining the survival variab=le
+dat$age
 dat$Surv <- Surv(dat$age,dat$dead)
+```
+
+```{r}
+ggplot(aes(x = age,col = EF), data = dat) + geom_density()
+ggplot(aes(x = Wt,col = EF), data = dat) + geom_density()
+ggplot(aes(x = Wt,y = age,col = EF), data = dat) + geom_point() + geom_smooth()
+```
+
+```{r}
+ggplot(aes(x = Total.Fights,y = age), data = dat) + geom_point() + geom_smooth()
+ggplot(aes(x = Total.Fights,y = age, col = dead), data = dat) + geom_point() + geom_smooth()
+ggplot(aes(y = Total.Fights,x = Wt), data = dat) + geom_point() + geom_smooth()
+```
+
+#Kaplan meier plot
+Enforcers (blue), as defined by the paper, vs non-enforcers (red)
+```{r}
+library(ggsurvfit)
+survfit2(Surv ~ EF, data = dat) %>% 
+  ggsurvfit() +
+  labs(
+    x = "Year",
+    y = "Overall survival probability"
+  ) + 
+  add_confidence_interval()
+```
+
+
+#Cox model with Total.fights as a covariate.  
+```{r}
 a <- coxph(Surv ~ Total.Fights + GP.x + Ht + Wt + DOB.Year + Pos , data = dat)
 summary(a)
-
-dat$Surv <- Surv(dat$age,dat$dead)
+```
+#Cox model with EF as a covariate.  
+```{r}
 a <- coxph(Surv ~ EF + GP.x + Ht + Wt + DOB.Year + Pos , data = dat)
 summary(a)
+```
+
 
 #Matching
+Now repeat this with matching.  
+```{r}
 library(MatchIt)
+#Mathing on EF
 m.out <- matchit(EF ~ GP.x + Ht + Wt + DOB.Year + Pos, data = dat, ratio = 1)
 dataMatched <- match.data(m.out)
 
-dataMatched %>% filter(dead) %>% group_by(EF) %>% summarise(mnage = mean(age), mnwt = mean(Wt))
+library(survival)
+#Create a survival variable on the matched data.  
+dataMatched$Surv <- Surv(dataMatched$age,dataMatched$dead)
+```
 
+#Effect of Enforcer on hazard ratio after matching
+n = 640 here.  
+```{r}
+coxph(Surv ~ EF, data = dataMatched)
+```
 
+```{r}
+coxph(Surv ~ EF + GP.x + Ht + Wt + DOB.Year + Pos, data = dataMatched)
+```
+#Conditioning on dead people 
+All the significance disappears.  
+```{r}
+dataMatched %>% filter(dead) %>% group_by(EF) %>% summarise(mnage = mean(as.numeric(age)), mnwt = mean(Wt))
+
+t.test(as.numeric(dataMatched$age[dataMatched$dead]) ~ dataMatched$EF[dataMatched$dead])
+
+t.test(as.numeric(dataMatched$Wt[dataMatched$dead]) ~ dataMatched$EF[dataMatched$dead])
+
+dataMatched$age <- as.numeric(dataMatched$age)
+a <- lm(age ~ EF, data = dataMatched[dataMatched$dead,])
+summary(a)
+
+b <- lm(age ~ EF + Wt, data = dataMatched[dataMatched$dead,])
+summary(b)
+```
+#Various stuff
+```{r}
 dataMatched$age <- as.numeric(dataMatched$age)
 b <- lm(age ~ Wt, data = dataMatched[dataMatched$dead,])
 summary(b)
 
+#Relationship between weight and age for those who are dead. 
 ggplot(aes(x = Wt, y = age), data = dataMatched[dataMatched$dead,]) + geom_point() + geom_smooth()
 
 
+# 
+# library(survival)
+# dataMatched$Surv <- Surv(dataMatched$age,dataMatched$dead)
+# 
+# #How many games should a playewr have played to be included????
+# coxph(Surv ~ EF, data = dataMatched)
+# coxph(Surv ~ EF + GP.x + Ht + Wt + DOB.Year + Pos, data = dataMatched)
+# 
+# sub <- dataMatched[dataMatched$dead,]
+# ggplot(aes(y = age, x = factor(EF)), data = sub) + geom_boxplot()
+# 
+# sub %>% group_by(EF) %>% summarize(mn = mean(age))
+# t.test(sub$age ~ sub$EF)
+# sub$age <- as.numeric(sub$age)
+# a <- lm(age ~ EF + Ht + Wt + GP.x + Pos, data = sub)
+# summary(a)
+# 
+# 
+# ggplot(aes(y = Wt, x = factor(EF)), data = sub) + geom_boxplot()
+# ggplot(aes(y = Wt, x = factor(EF)), data = dataMatched) + geom_boxplot()
+# 
+# 
+# 
+# 
+# 
+# coxph(Surv ~ Total.Fights  + GP.x + Ht + Wt + DOB.Year + Pos , data = dat[dat$GP.x >= 10,])
+# 
+# coxph(Surv ~ I(log(Total.Fights+1)) + GP.x, data = dat[dat$GP.x >= 10,])
+# 
+# 
+# summary(dat$Total.Fights)
+# 
+# coxph(Surv ~ Total.Fights  + GP + Ht + Wt + DOB.Year + Pos , data = dat[dat$Total.Fights <= 100,])
+# 
+# km_fit <- survfit(Surv(dat$age,dat$dead) ~ 1)
+# plot(km_fit)
+# 
+# library(ggplot2)
+# ggplot(aes(x = Total.Fights, y = age, col = dead), data = dat[dat$Total.Fights <= 100,]) + geom_point() + geom_smooth()
+# dat %>% group_by(DOB.Year) %>% summarise(fperg = sum(Total.Fights)/sum(GP)) %>% ggplot(aes(x = DOB.Year, y = fperg)) + geom_point() + geom_smooth()
+# dat %>% group_by(X1st.Season.Corrected) %>% summarise(fperg = sum(Total.Fights)/sum(GP)) %>% ggplot(aes(x = X1st.Season.Corrected, y = fperg)) + geom_point() + geom_smooth()
+# 
+# ggplot(aes(x = Total.Fights, y = age, col = dead), data = dat[dat$Total.Fights <= 100,]) + geom_point() + geom_smooth()
+# 
+# 
+
+
+
+```
+
+#Simulating from a coxph model with a Weibull baseline
+#Everything below here is still nonsense.  
+This is far from complete....
+```{r}
+
+#https://mathildesautreuil.github.io/survMS/articles/how-to-simulate-survival-models.html
+#mean = 1/lambda*gamma(1+a)
+lambda <- 4000000
+a <- -3.8
+1/(lambda^(1/a))*gamma(1+1/a)
+n <- 1000
+x <- runif(n/2,0,10)
+dat.sim <- data.frame(1,x = rep(x,2), EF = rep(c(0,1),each = n/2))
+dat.sim$Wt <- rnorm(n,200,15) 
+dat.sim$Wt[dat.sim$EF == 1] <- rnorm(n/2,215,15) 
+beta <- c(0,0,0,0.05)
+U <- runif(n)
+times <- 1/(lambda^(1/a))*((-log(1-U)/(exp(as.matrix(dat.sim)%*%beta))))^(1/a)
+mean(times)
+hist(times)
+summary(times)
+
+
+dat.sim$times <- times
+
+dat.sim %>% group_by(EF) %>% summarise(mean = mean(times), n = n())
+
+dat.sim %>% filter(times <= 951) %>% group_by(EF) %>% summarise(mean = mean(times), n = n())
+
+```
+
+
+```{r}
+set.seed(1234)
+weightE <- rnorm(100, 215, 15)
+weightC <- rnorm(100, 200, 15)
+
+x <- data.frame(Wt = c(weightE, weightC), EF = rep(c(1,0),each = 100))
+eps <- rnorm(100,0,3)
+x$age <- 60 + 0.5*(x$Wt - 200) + eps
+x$age <- 60 - 0.5*(x$Wt - 200) + eps
+summary(x$age)
+x$dead <- rbinom(200,1,0.2)
+
 
 library(survival)
-dataMatched$Surv <- Surv(dataMatched$age,dataMatched$dead)
+x$age[x$dead == 0] <- x$age[x$dead == 0] - runif(sum(x$dead == 0),0,30)
+coxph(Surv(age,dead) ~ EF, data = x)
+table(x$dead,x$EF)
+prop.test(c(29,18),c(100,100))
 
-#How many games should a playewr have played to be included????
-coxph(Surv ~ EF, data = dataMatched)
-coxph(Surv ~ EF + GP.x + Ht + Wt + DOB.Year + Pos, data = dataMatched)
-
-sub <- dataMatched[dataMatched$dead,]
-ggplot(aes(y = age, x = factor(EF)), data = sub) + geom_boxplot()
-
-sub %>% group_by(EF) %>% summarize(mn = mean(age))
-t.test(sub$age ~ sub$EF)
-sub$age <- as.numeric(sub$age)
-a <- lm(age ~ EF + Ht + Wt + GP.x + Pos, data = sub)
-summary(a)
-
-
-ggplot(aes(y = Wt, x = factor(EF)), data = sub) + geom_boxplot()
-ggplot(aes(y = Wt, x = factor(EF)), data = dataMatched) + geom_boxplot()
+x %>% filter(dead == 1) %>% group_by(EF) %>% summarise(mn = mean(age))
+t.test(x$age[x$dead == 1] ~ x$EF[x$dead == 1])
 
 
 
 
-
-coxph(Surv ~ Total.Fights  + GP.x + Ht + Wt + DOB.Year + Pos , data = dat[dat$GP.x >= 10,])
-
-coxph(Surv ~ I(log(Total.Fights+1)) + GP.x, data = dat[dat$GP.x >= 10,])
-
-
-summary(dat$Total.Fights)
-
-coxph(Surv ~ Total.Fights  + GP + Ht + Wt + DOB.Year + Pos , data = dat[dat$Total.Fights <= 100,])
-
-km_fit <- survfit(Surv(dat$age,dat$dead) ~ 1)
-plot(km_fit)
-
-library(ggplot2)
-ggplot(aes(x = Total.Fights, y = age, col = dead), data = dat[dat$Total.Fights <= 100,]) + geom_point() + geom_smooth()
-dat %>% group_by(DOB.Year) %>% summarise(fperg = sum(Total.Fights)/sum(GP)) %>% ggplot(aes(x = DOB.Year, y = fperg)) + geom_point() + geom_smooth()
-dat %>% group_by(X1st.Season.Corrected) %>% summarise(fperg = sum(Total.Fights)/sum(GP)) %>% ggplot(aes(x = X1st.Season.Corrected, y = fperg)) + geom_point() + geom_smooth()
-
-ggplot(aes(x = Total.Fights, y = age, col = dead), data = dat[dat$Total.Fights <= 100,]) + geom_point() + geom_smooth()
 
 
 
