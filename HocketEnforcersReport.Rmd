@@ -149,8 +149,7 @@ dat <- dat %>% filter(!is.na(Ht))
 
 ```{r}
 library(survival)
-#Defining the survival variab=le
-dat$age
+#Defining the survival variable
 dat$Surv <- Surv(dat$age,dat$dead)
 ```
 
@@ -166,7 +165,7 @@ ggplot(aes(x = Total.Fights,y = age, col = dead), data = dat) + geom_point() + g
 ggplot(aes(y = Total.Fights,x = Wt), data = dat) + geom_point() + geom_smooth()
 ```
 
-#Kaplan meier plot
+# Kaplan meier plot
 Enforcers (blue), as defined by the paper, vs non-enforcers (red)
 ```{r}
 library(ggsurvfit)
@@ -180,19 +179,19 @@ survfit2(Surv ~ EF, data = dat) %>%
 ```
 
 
-#Cox model with Total.fights as a covariate.  
+# Cox model with Total.fights as a covariate.  
 ```{r}
 a <- coxph(Surv ~ Total.Fights + GP.x + Ht + Wt + DOB.Year + Pos , data = dat)
 summary(a)
 ```
-#Cox model with EF as a covariate.  
+# Cox model with EF as a covariate.  
 ```{r}
 a <- coxph(Surv ~ EF + GP.x + Ht + Wt + DOB.Year + Pos , data = dat)
 summary(a)
 ```
 
 
-#Matching
+# Matching
 Now repeat this with matching.  
 ```{r}
 library(MatchIt)
@@ -205,7 +204,7 @@ library(survival)
 dataMatched$Surv <- Surv(dataMatched$age,dataMatched$dead)
 ```
 
-#Effect of Enforcer on hazard ratio after matching
+# Effect of Enforcer on hazard ratio after matching
 n = 640 here.  
 ```{r}
 coxph(Surv ~ EF, data = dataMatched)
@@ -214,7 +213,7 @@ coxph(Surv ~ EF, data = dataMatched)
 ```{r}
 coxph(Surv ~ EF + GP.x + Ht + Wt + DOB.Year + Pos, data = dataMatched)
 ```
-#Conditioning on dead people 
+# Conditioning on dead people 
 All the significance disappears.  
 ```{r}
 dataMatched %>% filter(dead) %>% group_by(EF) %>% summarise(mnage = mean(as.numeric(age)), mnwt = mean(Wt))
@@ -230,7 +229,7 @@ summary(a)
 b <- lm(age ~ EF + Wt, data = dataMatched[dataMatched$dead,])
 summary(b)
 ```
-#Various stuff
+# Various stuff
 ```{r}
 dataMatched$age <- as.numeric(dataMatched$age)
 b <- lm(age ~ Wt, data = dataMatched[dataMatched$dead,])
@@ -290,8 +289,8 @@ ggplot(aes(x = Wt, y = age), data = dataMatched[dataMatched$dead,]) + geom_point
 
 ```
 
-#Simulating from a coxph model with a Weibull baseline
-#Everything below here is still nonsense.  
+# Simulating from a coxph model with a Weibull baseline
+# Everything below here is still nonsense.  
 This is far from complete....
 ```{r}
 
