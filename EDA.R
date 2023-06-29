@@ -1,5 +1,5 @@
-gen <- read.csv("/Users/gregorymatthews/Dropbox/hockeyEnforcers/JAMA NHL Data/General-Table 1.csv")
-death <- read.csv("/Users/gregorymatthews/Dropbox/hockeyEnforcers/JAMA NHL Data/Deaths-Table 1.csv")
+gen <- read.csv("/Users/gregorymatthews/Dropbox/HockeyEnforcersGit/JAMA NHL Data/General-Table 1.csv")
+death <- read.csv("/Users/gregorymatthews/Dropbox/hockeyEnforcersGit/JAMA NHL Data/Deaths-Table 1.csv")
 
 library(tidyverse)
 gen$GP <- as.numeric(gsub(",","",gen$GP))

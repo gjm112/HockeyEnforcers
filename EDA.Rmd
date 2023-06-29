@@ -37,7 +37,7 @@ This 6039 matches the number from the JAMA paper.
 
 #dead <- do.call(rbind, deaths)
 #write.csv(dead, file = "/Users/gregorymatthews/Dropbox/hockeyEnforcers/deaths.csv")
-dead <- read.csv("/Users/gregorymatthews/Dropbox/hockeyEnforcers/deaths.csv")
+dead <- read.csv("/Users/gregorymatthews/Dropbox/hockeyEnforcersGit/deaths.csv")
 dead <- dead %>% filter(From >= 1967 & Name != "Name")
 
 table(dead$Name %in% gen_JAMA$Player)

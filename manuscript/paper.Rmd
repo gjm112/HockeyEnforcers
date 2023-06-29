@@ -1,0 +1,102 @@
+---
+title: |
+  |  \Large Enforcers are fine, probably.  
+author: | 
+  | \large Zach Binney \vspace{-1.1mm}
+  | \normalsize Epi \vspace{-1mm}
+  | \normalsize Oxford something at Emory \vspace{-1mm}
+  | \normalsize Georgia? \vspace{-1mm}
+  | \normalsize [`email`](mailto:ypu@something.edu) \vspace{-1mm}
+  |
+  | \large Brian M. Mills \vspace{-1.1mm}
+  | \normalsize College of Education \vspace{-1mm}
+  | \normalsize University of Texas at Austin \vspace{-1mm}
+  | \normalsize Austin, TX 78712 \vspace{-1mm}
+  | \normalsize [`brian.mills@austin.utexas.edu`](mailto:brian.mills@austin.utexas.edu) \vspace{-1mm}
+  |
+  | \large Leigha Derango \vspace{-1.1mm}
+  | \normalsize Department of Mathematics and Statistics \vspace{-1mm}
+  | \normalsize Loyola University Chicago \vspace{-1mm}
+  | \normalsize Chicago, IL 60660 \vspace{-1mm}
+  | \normalsize [`lderango@luc.edu`](mailto:lderango@luc.edu) \vspace{-1mm}
+  |
+  | \large Gregory J. Matthews \vspace{-1.1mm}
+  | \normalsize Department of Mathematics and Statistics \vspace{-1mm}
+  | \normalsize Center for Data Science and Consulting \vspace{-1mm}
+  | \normalsize Loyola University Chicago \vspace{-1mm}
+  | \normalsize Chicago, IL 60660 \vspace{-1mm}
+  | \normalsize [`gmatthews1@luc.edu`](mailto:gmatthews1@luc.edu) \vspace{-1mm}
+abstract: |
+  | Baseball is some weird and wild shit. \vspace{2mm}
+  | *Keywords*: change point analysis, baseball, 
+bibliography: references.bib
+fontsize: 12pt
+link-citations: true
+linkcolor: cyan
+urlcolor: cyan
+output:
+  pdf_document:
+    df_print: kable
+    number_sections: true
+    keep_tex: true
+header-includes:
+ \usepackage{setspace}
+ \setstretch{1.15}
+ \usepackage{float}
+ \floatplacement{figure}{t}
+---
+
+```{r setup, echo=FALSE, message=FALSE}
+knitr::opts_chunk$set(
+	echo = FALSE,
+	fig.align = "center",
+	message = FALSE,
+	warning = FALSE
+)
+
+gjm <- function(x, color = "red") {
+  sprintf("\\textcolor{%s}{%s}", color, x)}
+```
+
+```{r pkgs}
+library(tidyverse)
+theme_set(theme_minimal())
+library(Lahman)
+```
+
+\newpage
+
+# Introduction {#sec:intro}
+Fighting in the National Hockey League (NHL) has been an integral part of the sport since the earliest days of the league.  [Explain the role of fighting in hockey].  This has led to the rise of teams carrying so called "enforcers" of their rosters.  An enforcer is a player who, along with being a regular player, is tasked with fighting players on the opposing team who have broken one of the unwritten rules of hockey.  While any player on a hockey team can get into a fight, enforcers are exposed to many more fights than your everyday average NHL player.  As a result of being exposed to these fights, they are experience additional head trauma, above and beyond the normal head trauma associated with hockey, from being punched in the head during these fights.    
+@Popkin2023 explored the effects of being an enforcer, defined by either number of careers fights or number of career penalty minutes, on mortality.  They use a matched cohort study design and identity no significant difference in the mortality rates between enforcers and controls (i.e. non-enforcers).  While they find no difference in mortality rates, they do estimate that "being an enforcer was associated with dying approximately 10 years earlier and more frequently of suicide and drug overdose."
+
+If true, this is truly an alarming finding.  However, upon examining their statistical methods and attempting to reproduce their results using a survival analysis approach, which we believe is more appropriate, we were unable to reach the same conclusions as @Popkin2023.  
+
+Interesting paper: Don't do PS matching: https://gking.harvard.edu/publications/why-propensity-scores-should-not-be-used-formatching
+
+# Methods {#sec:methods}
+@Popkin2023 presents a matched cohort study with n = 6039 NHL players who players any games between the 1967-68 and the 2021-22 NHL seasons.  They then define a player as an enforcer in one of two ways: 
+
+1. Any player with at least 50 career fights (n = 331)
+2. Any player who averaged at least 3 penalty minutes per game (n = 183)
+
+Enforcers were then matched to non-enforcers on birth year, weight, height, [whagt else].  After matching, mortality rates between the two groups were computed.  Neither definition of enforcers yielded significant difference in the mortality rates between enforcers and non-enforcers.  
+
+However, the authors of @Popkin2023 next conditioned on death yielding a sample size of n = 13 and n = 14 for the enforcer (defined by total fights) vs non-enforcer group and show that the age at death is about 10 years less for the enforcers group relative to the non-enforcer group (p = 0.03).  
+
+Greg doesn't think this conditioning on death is valid!  The point of matching is to balance the groups in regards to confounders.  However, after matching, you can't just look at a subset and compare betwee then two groups because you could end up with unbalanced sets!  And indeed we do see this!  For example, the weight in the dead enforcers group is on average higher than the weight of the dead non-enforcers group.  So we are comparing age at death of
+
+The more I think about this, the less convinced I am that I'm "right" that this isn't a valid analysis.  Surely, they should have been doing survival analysis, but I can't quite articular why conditioning on the death and then looking at mean age is incorrect.  It just feels wrong to me and I'm sure there is a reason, but I am having trouble specifying exactly what the reason is.  
+
+
+# Results {#sec:results}
+
+# Conclusion {#sec:conclusion}
+
+# Acknowledgements {-}
+
+# Supplementary Material {-}
+
+All code for reproducing the analyses in this paper is publicly available at https://github.com/gjm112/HockeyEnforcers
+
+# References
