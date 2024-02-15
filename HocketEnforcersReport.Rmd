@@ -20,6 +20,8 @@ This is the exact number of players that the paper cites.
 ```{r}
 #This is the number they get in the paper.  
 gen_JAMA %>% filter(X1st.Season.Corrected >= 1967) %>% nrow()
+#I get 331 individuals with greater than 50 fights
+gen_JAMA %>% filter(X1st.Season.Corrected >= 1967 & Total.Fights >= 50) %>% nrow()
 ```
 
 Webscraping hockey deths from hockey-reference.com
@@ -122,8 +124,12 @@ dead$G <- as.numeric(dead$G)
 gen_JAMA %>% filter(X1st.Season.Corrected >= 1967) %>% nrow()
 dat <- gen_JAMA %>% filter(X1st.Season.Corrected >= 1967) %>% left_join(select(dead,Name,Birth.Date,Death.Date,GP),by = c("Player" = "Name" ))
 
+#Remove goalies 
+#There is no one to remove because there are no goalies in the original data set.  
+dat <- dat %>% filter(Pos != "G")
+
 #All these goalies.
-dead$Name[!dead$Name %in% gen_JAMA$Player]
+dead[!dead$Name %in% gen_JAMA$Player,]
 ```
 
 ```{r}
@@ -141,9 +147,19 @@ dat$Pos <- as.factor(dat$Pos)
 dat$Ctry2 <- dat$Ctry
 dat$Ctry2[!dat$Ctry2 %in% c("FIN","CZE","RUS","SWE","USA","CAN")] <- "OTH" 
 dat$Ctry2 <- as.factor(as.character(dat$Ctry2))
-dat$EF <- dat$Total.Fights>50
+#At least 50, not greater than 50.
+dat$EF <- dat$Total.Fights>=50
 
+
+#Cleaning penalty minutes
+pm_temp <- data.frame(do.call(rbind,strsplit(dat$PIM.GP,":")))
+dat$PIM.GP_numeric <- as.numeric(pm_temp[,1]) + as.numeric(pm_temp[,2])/60
+dat$EP <- dat$PIM.GP_numeric >=3
+#I match the paper's n = 183 EP.But when I remove the people with missing height, I lose one of the 182 and end up with 182.
+
+#Removed 4 rows
 dat <- dat %>% filter(!is.na(Ht))
+
 ```
 
 Creating the Surv object
@@ -157,6 +173,13 @@ Some plots.
 ggplot(aes(x = age,col = EF), data = dat) + geom_density()
 ggplot(aes(x = Wt,col = EF), data = dat) + geom_density()
 ggplot(aes(x = Wt,y = age,col = EF), data = dat) + geom_point() + geom_smooth()
+```
+
+Some plots.
+```{r}
+ggplot(aes(x = age,col = EP), data = dat) + geom_density()
+ggplot(aes(x = Wt,col = EP), data = dat) + geom_density()
+ggplot(aes(x = Wt,y = age,col = EP), data = dat) + geom_point() + geom_smooth()
 ```
 Some more plots.
 ```{r}
@@ -178,11 +201,25 @@ survfit2(Surv ~ EF, data = dat) %>%
   add_confidence_interval()
 ```
 
+Enforcers - Penalty (EP) (blue), as defined by the paper, vs non-enforcers (red)
+```{r}
+library(ggsurvfit)
+survfit2(Surv ~ EP, data = dat) %>% 
+  ggsurvfit() +
+  labs(
+    x = "Year",
+    y = "Overall survival probability"
+  ) + 
+  add_confidence_interval()
+```
+
 
 # Cox model with Total.fights as a covariate.  
 ```{r}
 a <- coxph(Surv ~ Total.Fights + GP.x + Ht + Wt + DOB.Year + Pos , data = dat)
 summary(a)
+library(xtable)
+xtable(summary(a)$coef)
 ```
 # Cox model with EF as a covariate.  
 No significant effect for enforcers in terms of survival times.  
@@ -191,6 +228,22 @@ Though the sign of the effect is what you would expect to see if there was a ris
 ```{r}
 a <- coxph(Surv ~ EF + GP.x + Ht + Wt + DOB.Year + Pos , data = dat)
 summary(a)
+library(xtable)
+xtable(summary(a)$coef)
+```
+
+```{r}
+cor(dat[,c("PIM.GP_numeric","Ht","Wt","DOB.Year")])
+
+a <- coxph(Surv ~ EP + GP.x + Ht + Wt + DOB.Year + Pos , data = dat)
+summary(a)
+library(xtable)
+xtable(summary(a)$coef)
+
+a <- coxph(Surv ~ PIM.GP_numeric  + GP.x + Ht + Wt + DOB.Year + Pos , data = dat)
+summary(a)
+library(xtable)
+xtable(summary(a)$coef)
 ```
 
 
@@ -205,21 +258,69 @@ dataMatched <- match.data(m.out)
 library(survival)
 #Create a survival variable on the matched data.  
 dataMatched$Surv <- Surv(dataMatched$age,dataMatched$dead)
-```
+
 
 # Effect of Enforcer on hazard ratio after matching
-n = 640 here.  
-```{r}
+#n = 640 here.  
+
 coxph(Surv ~ EF, data = dataMatched)
+coxph(Surv ~ EF + GP.x + Ht + Wt + DOB.Year + Pos, data = dataMatched)
+
+#Survival rates
+chisq.test(dataMatched$EF, dataMatched$dead)
+mean(dataMatched$dead[dataMatched$EF])
+mean(dataMatched$dead[!dataMatched$EF])
+
+library(ggsurvfit)
+survfit2(Surv ~ EF, data = dataMatched) %>% 
+  ggsurvfit() +
+  labs(
+    x = "Year",
+    y = "Overall survival probability"
+  ) + 
+  add_confidence_interval()
+
 ```
 
+Now repeat this with matching.  
 ```{r}
-coxph(Surv ~ EF + GP.x + Ht + Wt + DOB.Year + Pos, data = dataMatched)
+library(MatchIt)
+#Mathing on EF
+m.out <- matchit(EP ~ GP.x + Ht + Wt + DOB.Year + Pos, data = dat, ratio = 1)
+dataMatched <- match.data(m.out)
+
+library(survival)
+#Create a survival variable on the matched data.  
+dataMatched$Surv <- Surv(dataMatched$age,dataMatched$dead)
+
+coxph(Surv ~ EP, data = dataMatched)
+coxph(Surv ~ EP + GP.x + Ht + Wt + DOB.Year + Pos, data = dataMatched)
+
+#Survival rates
+chisq.test(dataMatched$EP, dataMatched$dead)
+mean(dataMatched$dead[dataMatched$EP])
+mean(dataMatched$dead[!dataMatched$EP])
+
+
+library(ggsurvfit)
+survfit2(Surv ~ EP, data = dataMatched) %>% 
+  ggsurvfit() +
+  labs(
+    x = "Year",
+    y = "Overall survival probability"
+  ) + 
+  add_confidence_interval()
 ```
+
+
 # Conditioning on dead people 
   
 ```{r}
-dataMatched %>% filter(dead) %>% group_by(EF) %>% summarise(mnage = mean(as.numeric(age)), mnwt = mean(Wt), mnDOB = mean(DOB.Year), mngp = mean(GP.x))
+dataMatched %>% filter(dead) %>% group_by(EF) %>% summarise(mnage = mean(as.numeric(age)), mnwt = mean(Wt), mnDOB = mean(DOB.Year), mngp = mean(GP.x), n = n())
+
+dataMatched %>% filter(!dead) %>% group_by(EF) %>% summarise(mnage = mean(as.numeric(age)), mnwt = mean(Wt), mnDOB = mean(DOB.Year), mngp = mean(GP.x), n = n())
+
+dataMatched %>% group_by(EF) %>% summarise(mnage = mean(as.numeric(age)), mnwt = mean(Wt), mnDOB = mean(DOB.Year), mngp = mean(GP.x), n = n())
 
 
 t.test(as.numeric(dataMatched$age[dataMatched$dead]) ~ dataMatched$EF[dataMatched$dead])
