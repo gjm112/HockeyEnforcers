@@ -50,6 +50,9 @@ dead <- read.csv("/Users/gregorymatthews/Dropbox/HockeyEnforcersGit/deaths.csv")
 #Filtering for players who started in or after 1967.  
 dead <- dead %>% filter(From >= 1967 & Name != "Name")
 
+
+
+
 #table(dead$Name %in% gen_JAMA$Player)
 #dead[!dead$Name %in% gen_JAMA$Player,]
 #tomatch = data.frame(dead$Name[!dead$Name %in% gen_JAMA$Player])
@@ -111,6 +114,12 @@ dead$Name[dead$Name == 'Greg Tebbutt'] <- 'Gregory Tebbutt'
 #Mike Blake -> Michael Wilmer Blake, matched by birthday, not in JAMA
 dead$Name[dead$Name == 'Petr KlÃ­ma'] <- 'Petr Klima'
 dead$Name[dead$Name == 'BÃ¶rje Salming'] <- 'Borje Salming'
+
+#Dead Players in hockey reference but not death_JAMA
+dead$Name[!dead$Name %in% death_JAMA$Enforcers]
+
+#"Bill Masterton" : Died in a hockey game!
+#Don Ashby: 	May 30, 1981 (aged 26)
 ```
 Merging on death data. 
 ```{r}
@@ -127,9 +136,13 @@ dat <- gen_JAMA %>% filter(X1st.Season.Corrected >= 1967) %>% left_join(select(d
 #Remove goalies 
 #There is no one to remove because there are no goalies in the original data set.  
 dat <- dat %>% filter(Pos != "G")
+table(dat$Pos)
+sum(!is.na(dat$Death.Date))
 
 #All these goalies.
-dead[!dead$Name %in% gen_JAMA$Player,]
+dead[!dead$Name %in% gen_JAMA$Player,] 
+
+sum(!is.na(dat$Death.Date))
 ```
 
 ```{r}
@@ -160,6 +173,28 @@ dat$EP <- dat$PIM.GP_numeric >=3
 #Removed 4 rows
 dat <- dat %>% filter(!is.na(Ht))
 
+table(dat$dead)
+table(dat$EF)
+table(dat$EP)
+
+dat %>% group_by(EF) %>% summarize(n = n(), mnage = mean(age),seage = sd(age)/sqrt(n),mnwt = mean(Wt), sewt = sd(Wt)/sqrt(n))
+
+mod <- lm(Wt ~ EF, data = dat)
+predict(mod, newdata = data.frame(EF = c(FALSE,TRUE)), interval = "confidence")
+#       fit      lwr      upr
+# 1 196.2656 195.8592 196.6720
+# 2 210.1511 208.4640 211.8381
+dat$age <- as.numeric(dat$age)
+mod <- lm(age ~ EF, data = dat)
+predict(mod, newdata = data.frame(EF = c(FALSE,TRUE)), interval = "confidence")
+#        fit      lwr      upr
+# 1 47.60378 47.21229 47.99528
+# 2 53.93270 52.30750 55.55789
+
+t.test(dat$age~dat$EF)
+t.test(dat$Wt~dat$EF)
+
+dat %>% group_by(EP) %>% summarize(mnage = mean(age), n = n(), se = sd(age)/sqrt(n))
 ```
 
 Creating the Surv object
@@ -171,6 +206,7 @@ dat$Surv <- Surv(dat$age,dat$dead)
 Some plots.
 ```{r}
 ggplot(aes(x = age,col = EF), data = dat) + geom_density()
+ggplot(aes(x = age,col = EP), data = dat) + geom_density()
 ggplot(aes(x = Wt,col = EF), data = dat) + geom_density()
 ggplot(aes(x = Wt,y = age,col = EF), data = dat) + geom_point() + geom_smooth()
 ```

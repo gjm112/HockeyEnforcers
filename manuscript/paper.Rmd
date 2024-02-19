@@ -60,9 +60,130 @@ gjm <- function(x, color = "red") {
 
 ```{r pkgs}
 library(tidyverse)
+library(dplyr)
+library(stringr)
 theme_set(theme_minimal())
-library(Lahman)
 ```
+
+
+```{r echo = FALSE}
+#Reading in the raw data from the paper.  
+library(tidyverse)
+gen_JAMA <- read.csv("/Users/gregorymatthews/Dropbox/HockeyEnforcersGit/JAMA NHL Data/General-Table 1.csv")
+death_JAMA <- read.csv("/Users/gregorymatthews/Dropbox/HockeyEnforcersGit/JAMA NHL Data/Deaths-Table 1.csv")
+
+dead <- read.csv("/Users/gregorymatthews/Dropbox/HockeyEnforcersGit/deaths.csv")
+#Filtering for players who started in or after 1967.  
+dead <- dead %>% filter(From >= 1967 & Name != "Name")
+
+
+
+
+# Pelle Lindbergh -> that was his real name, no other spelling, not sure about this one
+dead$Name[dead$Name == 'Lars-Erik SjÃ¶berg'] <- 'Lars Sjoberg'
+dead$Name[dead$Name == 'BjÃ¸rn Skaare'] <- 'Bjorn Skaare'
+dead$Name[dead$Name == 'Roger HÃ¤gglund'] <- 'Roger Hagglund'
+dead$Name[dead$Name == 'Michel Larocque'] <- 'Mario Larocque' # matched by birth year
+#	Fern Rivard -> Bob Rivard is in JAMA but the birthdays don't match, this is Fernand Joseph Rivard who is not in JAMA
+dead$Name[dead$Name == 'Yanick DuprÃ©'] <- 'Yanick Dupre'
+dead$Name[dead$Name == 'DuÅ¡an PaÅ¡ek'] <- 'Dusan Pasek'
+# Roy Edwards -> this is Allan Roy Edwards (matched w/ google by birthday), not in JAMA
+dead$Name[dead$Name == 'StÃ©phane Morin'] <- 'Stephane Morin'
+dead$Name[dead$Name == 'Dmitri Tertyshny'] <- 'Dimitri Tertyshny'
+# Garry Bauman -> Garry Glenwood Bauman, matched on google by birthday, not in JAMA under gary, Garry, Bauman, or Glenwood
+dead$Name[dead$Name == 'GaÃ©tan Duchesne'] <- 'Gaetan Duchesne'
+# Michel Plasse -> Michel Pierre Plasse, matched by birthday, not in JAMA under Michel, Pierre, or Plasse
+# Chris Worthy -> Christopher John Worthy, matched by birthday, not in JAMA under last name Worthy or 'Christopher John'
+dead$Name[dead$Name == 'Miroslav DvoÅ™Ã¡k'] <- 'Miroslav Dvorak'
+# Wayne Stephenson -> Wayne Frederick Stephenson, matched by birthday, not in JAMA under Wayne or Frederick
+dead$Name[dead$Name == 'Igor Vyazmikin'] <- 'Igor Viazmikin'
+dead$Name[dead$Name == 'Rick Martin'] <- 'Richard Martin'
+dead$Name[dead$Name == 'Karel RachÅ¯nek'] <- 'Karel Rachunek'
+dead$Name[dead$Name == 'KÄrlis SkrastiÅ†Å¡'] <- 'Karlis Skrastins'
+dead$Name[dead$Name == 'Josef VaÅ¡Ã­Äek'] <- 'Josef Vasicek'
+dead$Name[dead$Name == 'Kaspars AstaÅ¡enko'] <- 'Kaspars Astashenko'
+dead$Name[dead$Name == 'Jeff McDill'] <- 'Jeffrey McDill'
+# Joe Junkin -> Joseph Brian Junkin, matched by birthday, last name not present in JAMA
+# Andre Gill -> there is another player born in 84 with the same name but neither are in JAMA
+# Seth Martin -> matched by birthday, didn't go by another name, not in JAMA
+#	Don McLeod -> Donald Martin McLeod, matched by birthday, not in JAMA 
+dead$Name[dead$Name == 'Greg Parks'] <- 'Gregory Parks'
+# Ken Broderick -> Kenneth Lorne Broderick, matched by birthday, last name not in JAMA
+# Don Caley -> Donald Thomas Caley, matched by birthday, last name not in JAMA
+# Ed Dyck -> Edwin Paul 'Ed' Dyck, matched by birthday, NOT Henry Dyck who is only Dyck in JAMA
+#	Sergei Mylnikov -> Sergei Aleksandrovich Mylnikov, matched by birthday, not in JAMA
+dead$Name[dead$Name == 'Marek SvatoÅ¡'] <- 'Marek Svatos'
+#Ray Emery -> Raymond Robert Emery, matched by birthday, last name not in JAMA
+dead$Name[dead$Name == 'Bob Sullivan'] <- 'Robert Sullivan'
+dead$Name[dead$Name == 'Denis DupÃ©rÃ©'] <- 'Denis Dupere'
+#	Jim McLeod -> Jimmy McLeod, birthday doesn't match any McLeods in JAMA
+dead$Name[dead$Name == 'Dmitri Nabokov'] <- 'Dimitri Nabokov'
+# Jim Pettie -> James 'Seaweed' Pettie, matched by birthday, last name not in JAMA
+#	Tony Esposito -> Anthony James "Tony O" Esposito, matched by birthday, not in JAMA
+dead$Name[dead$Name == 'Miroslav FryÄer'] <- 'Miroslav Frycer'
+# Gary Inness -> Gary George Inness, matched by birthday, last name not in JAMA
+# Matiss Kivlenieks -> Matiss Kivlenieks, matched by birthday, not in JAMA
+dead$Name[dead$Name == 'RenÃ© Robert'] <- 'Rene Robert'
+# Ken Brown -> Kenneth Murray Brown, matched by birthday, not in JAMA
+# Robbie Moore -> Robert David Moore, matched by birthday, not in JAMA
+# Curt Ridley -> Charles Curtis Ridley, matched by birthday which is actually off by one day but def not Mike Ridley in JAMA
+dead$Name[dead$Name == 'Greg Tebbutt'] <- 'Gregory Tebbutt'
+#Mike Blake -> Michael Wilmer Blake, matched by birthday, not in JAMA
+dead$Name[dead$Name == 'Petr KlÃ­ma'] <- 'Petr Klima'
+dead$Name[dead$Name == 'BÃ¶rje Salming'] <- 'Borje Salming'
+
+
+gen_JAMA$GP <- as.numeric(gsub(",","",gen_JAMA$GP))
+gen_JAMA$PIM <- as.numeric(gsub(",","",gen_JAMA$PIM))
+dead$GP <- as.numeric(dead$GP)
+dead$From <- as.numeric(dead$From)
+dead$G <- as.numeric(dead$G)
+gen_JAMA %>% filter(X1st.Season.Corrected >= 1967) %>% nrow()
+dat <- gen_JAMA %>% filter(X1st.Season.Corrected >= 1967) %>% left_join(select(dead,Name,Birth.Date,Death.Date,GP),by = c("Player" = "Name" ))
+
+#Remove goalies 
+#There is no one to remove because there are no goalies in the original data set.  
+dat <- dat %>% filter(Pos != "G")
+
+#Dataprep
+dat <- dat %>% mutate(dead = !is.na(Death.Date), 
+                      DOB = as.Date(DOB), 
+                      Death.Date = as.Date(Death.Date))
+#I'm using the date of the latest death date as the censoring time: May 7, 2023
+dat$Death.Date[!dat$dead] <- as.Date("2023-05-07")
+dat$age <- (dat$Death.Date - dat$DOB)/365
+dat$Ht <- as.numeric(dat$Ht)
+dat$Wt <- as.numeric(dat$Wt)
+dat$FperG <- dat$Total.Fights/dat$GP.x
+dat$Pos <- as.factor(dat$Pos)
+dat$Ctry2 <- dat$Ctry
+dat$Ctry2[!dat$Ctry2 %in% c("FIN","CZE","RUS","SWE","USA","CAN")] <- "OTH" 
+dat$Ctry2 <- as.factor(as.character(dat$Ctry2))
+#At least 50, not greater than 50.
+dat$EF <- dat$Total.Fights>=50
+
+
+#Cleaning penalty minutes
+pm_temp <- data.frame(do.call(rbind,strsplit(dat$PIM.GP,":")))
+dat$PIM.GP_numeric <- as.numeric(pm_temp[,1]) + as.numeric(pm_temp[,2])/60
+dat$EP <- dat$PIM.GP_numeric >=3
+#I match the paper's n = 183 EP.But when I remove the people with missing height, I lose one of the 182 and end up with 182.
+
+#Removed 4 rows
+dat <- dat %>% filter(!is.na(Ht))
+
+summ <-
+  dat %>% group_by(EF) %>% summarize(
+    n = n(),
+    mnage = round(mean(age), 2),
+    seage = round(sd(age) / sqrt(n),3),
+    mnwt = round(mean(Wt), 2),
+    sewt = round(sd(Wt) / sqrt(n),3),
+    mnht = round(mean(Ht), 2),
+    seht = round(sd(Ht) / sqrt(n),3)
+  )
+
+```   
 
 \newpage
 
@@ -74,22 +195,91 @@ If true, this is truly an alarming finding.  However, upon examining their stati
 
 Interesting paper: Don't do PS matching: https://gking.harvard.edu/publications/why-propensity-scores-should-not-be-used-formatching
 
+# Data 
+We obtained the two data sets used in @popkin2023: general table (n = 7432) and death table (n = 45).  After filtering for players who's first season was 1967 or greater, there are 6039 observations remaining (the exact number mentioned in @popkin2023).  
+
+@Popkin2023 presents a matched cohort study with n = 6039 NHL players who played any games between the 1967-68 and the 2021-22 NHL seasons.  (We removed 4 players with missing values for height leaving us with 6035 observations for analysis.)  They then define a player as an enforcer in one of two ways: 
+
+1. EF: Any player with at least 50 career fights (n = 331)
+2. EP: Any player who averaged at least 3 penalty minutes per game (n = 183)
+
+(Note: In our analysis I only have 182 players who are defined as EP)
+
+While @popkin2023 only looks at a total of 45 deceased players  (21 enforcers and 24 controls), we scraped hockey-reference and identified 252 players who were included in the gen JAMA data who were deceased as of May 7, 2023.  
+
+
+## EDA
+On average enforcers in this data set tended to be older than the non-enforcers (EF: 53.93 vs non-EF: 47.60 and EP: 52.50 vs non-EP: 47.81)
+	
+
+<!-- add a table here with summary statistics comparing the groups EF and EP.-->
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+ Variable & EF = TRUE & EF = FALSE & p-value \\
+ \hline
+ Age (years) & `r summ$mnage[summ$EF]` (`r summ$seage[summ$EF]`) & `r summ$mnage[!summ$EF]` (`r summ$seage[!summ$EF]`) & `r ifelse(round(t.test(dat$age~dat$EF)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$age~dat$EF)$p.value,2))`\\
+ Weight (lbs) & `r summ$mnwt[summ$EF]` (`r summ$sewt[summ$EF]`) & `r summ$mnwt[!summ$EF]` (`r summ$sewt[!summ$EF]`) & `r ifelse(round(t.test(dat$Wt~dat$EF)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$age~dat$EF)$p.value,2))`\\
+  Height (in) & `r summ$mnht[summ$EF]` (`r summ$seht[summ$EF]`) & `r summ$mnht[!summ$EF]` (`r summ$seht[!summ$EF]`) & `r ifelse(round(t.test(dat$Ht~dat$EF)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$Ht~dat$EF)$p.value,2))`\\
+ \hline
+\end{tabular}
+\end{center}
+
+
 # Methods {#sec:methods}
-@Popkin2023 presents a matched cohort study with n = 6039 NHL players who players any games between the 1967-68 and the 2021-22 NHL seasons.  They then define a player as an enforcer in one of two ways: 
+@Popkin2023 presents a matched cohort study with n = 6039 NHL players who played any games between the 1967-68 and the 2021-22 NHL seasons.  They then define a player as an enforcer in one of two ways: 
 
-1. Any player with at least 50 career fights (n = 331)
-2. Any player who averaged at least 3 penalty minutes per game (n = 183)
+1. EF: Any player with at least 50 career fights (n = 331)
+2. EP: Any player who averaged at least 3 penalty minutes per game (n = 183)
 
-Enforcers were then matched to non-enforcers on birth year, weight, height, [whagt else].  After matching, mortality rates between the two groups were computed.  Neither definition of enforcers yielded significant difference in the mortality rates between enforcers and non-enforcers.  
+Enforcers were then matched to non-enforcers on birth year, weight, height, etc.  After matching, mortality rates between the two groups were computed.  Neither definition of enforcers yielded significant difference in the mortality rates between enforcers and non-enforcers.  (Greg comment: After matching you CAN compare mortality rates and that comparison would be valid AT THAT GIVEN POINT when they are compared.  But a better analysis would be to use survival analysis.  The problem with mortality rate is that eventually everyone in both groups will be dead if you wait long enough and that comparison is meaningless. Survival times are much better comparison. )
 
 However, the authors of @Popkin2023 next conditioned on death yielding a sample size of n = 13 and n = 14 for the enforcer (defined by total fights) vs non-enforcer group and show that the age at death is about 10 years less for the enforcers group relative to the non-enforcer group (p = 0.03).  
 
-Greg doesn't think this conditioning on death is valid!  The point of matching is to balance the groups in regards to confounders.  However, after matching, you can't just look at a subset and compare betwee then two groups because you could end up with unbalanced sets!  And indeed we do see this!  For example, the weight in the dead enforcers group is on average higher than the weight of the dead non-enforcers group.  So we are comparing age at death of
+Greg doesn't think this conditioning on death is valid!  The point of matching is to balance the groups in regards to confounders.  However, after matching, you can't just look at a subset and compare between then two groups because you could end up with unbalanced sets!  And indeed we do see this!  For example, the weight in the dead enforcers group is on average higher than the weight of the dead non-enforcers group.  
 
-The more I think about this, the less convinced I am that I'm "right" that this isn't a valid analysis.  Surely, they should have been doing survival analysis, but I can't quite articular why conditioning on the death and then looking at mean age is incorrect.  It just feels wrong to me and I'm sure there is a reason, but I am having trouble specifying exactly what the reason is.  
+
 
 
 # Results {#sec:results}
+
+Add EDA results. 
+
+Add Cox models. 
+
+```{r echo = FALSE}
+library(survival)
+#Defining the survival variable
+dat$Surv <- Surv(dat$age,dat$dead)
+```
+
+```{r echo = FALSE, fig.cap="Kaplan Meier plot for EF" }
+library(ggsurvfit)
+survfit2(Surv ~ EF, data = dat) %>% 
+  ggsurvfit() +
+  labs(
+    x = "Year",
+    y = "Overall survival probability"
+  ) + 
+  add_confidence_interval()
+```
+
+```{r echo = FALSE, fig.cap="Kaplan Meier plot for EP" }
+library(ggsurvfit)
+survfit2(Surv ~ EP, data = dat) %>% 
+  ggsurvfit() +
+  labs(
+    x = "Year",
+    y = "Overall survival probability"
+  ) + 
+  add_confidence_interval()
+```
+
+Talk about the conditioning on death stuff.  
+
+Age difference statement in Popkin is over stated.  
+
 
 # Conclusion {#sec:conclusion}
 
