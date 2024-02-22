@@ -210,6 +210,9 @@ As mentioned earlier, the outcome of this study is relevant to the debates about
 
 Interesting paper: Don't do PS matching: https://gking.harvard.edu/publications/why-propensity-scores-should-not-be-used-formatching
 
+silverwood: https://orca.cardiff.ac.uk/id/eprint/86257/12/Victoria%20Silverwood%20Final%20Thesis%20SIGS%20REMOVED.pdf
+
+colburn: https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1533-8525.1986.tb00249.x
 
 # Data 
 We obtained the two data sets used in @popkin2023: general table (n = 7432) and death table (n = 45).  After filtering for players who's first season was 1967 or greater, there are 6039 observations remaining (the exact number mentioned in @popkin2023).  
