@@ -252,29 +252,120 @@ survfit2(Surv ~ EP, data = dat) %>%
 
 # Cox model with Total.fights as a covariate.  
 ```{r}
-a <- coxph(Surv ~ Total.Fights + GP.x + Ht + Wt + DOB.Year + Pos , data = dat)
-summary(a)
+prop.table(table(dat$Pos, dat$EF),1)
+prop.table(table(dat$Pos, dat$EP),1)
+chisq.test(dat$Pos, dat$EF)
+
+#Group forwards together
+dat$Pos2 <- as.character(dat$Pos)
+dat$Pos2[dat$Pos2 %in% c("L","R")] <- "W"
+dat$Pos2 <- factor(dat$Pos2)
+
+coxphmod_totalfights <- coxph(Surv ~ Total.Fights + GP.x + Ht + Wt + DOB.Year + Pos2 , data = dat)
+summary(coxphmod_totalfights)
 library(xtable)
-xtable(summary(a)$coef)
+xtable(summary(coxphmod_totalfights)$coef)
+#test for proportional hazards assumption
+cox.zph(coxphmod_totalfights)
 ```
 # Cox model with EF as a covariate.  
 No significant effect for enforcers in terms of survival times.  
 Though the sign of the effect is what you would expect to see if there was a risk to being an enforcer.  
 
 ```{r}
-a <- coxph(Surv ~ EF + GP.x + Ht + Wt + DOB.Year + Pos , data = dat)
-summary(a)
+coxphmod_EF <- coxph(Surv ~ EF + GP.x + Ht + Wt + DOB.Year + Pos2 , data = dat)
+summary(coxphmod_EF)
 library(xtable)
-xtable(summary(a)$coef)
+xtable(summary(coxphmod_EF)$coef[,-4], digits = 5)
+cox.zph(coxphmod_EF)
+
+
+newdataEF <-
+  with(dat, data.frame(EF = c(TRUE, FALSE), 
+                       GP.x = rep(mean(GP.x), 2),
+                       Ht = rep(mean(Ht), 2),
+                       Wt = rep(mean(Wt), 2),
+                       DOB.Year = rep(mean(DOB.Year), 2),
+                       I_forward = rep(1, 2))
+                       )
+plot(survfit(coxphmod_EF, newdata = newdataEF), conf.int = TRUE, lty = c(1,2))
+
+
+nnn <- nrow(survfit(coxphmod_EF, newdata = newdataEF)$surv)
+ggdat <- data.frame(enforcer = c(rep("Enforcer",nnn),rep("Non-Enforcer",nnn)),
+  surv = c(
+  survfit(coxphmod_EF, newdata = newdataEF)$surv[, 1],
+  survfit(coxphmod_EF, newdata = newdataEF)$surv[, 2]
+),
+  lower = c(
+  survfit(coxphmod_EF, newdata = newdataEF)$lower[, 1],
+  survfit(coxphmod_EF, newdata = newdataEF)$lower[, 2]
+),
+  upper = c(
+  survfit(coxphmod_EF, newdata = newdataEF)$upper[, 1],
+  survfit(coxphmod_EF, newdata = newdataEF)$upper[, 2]
+),
+time = rep(survfit(coxphmod_EF, newdata = newdataEF)$time,2)
+)
+ggplot(aes(x = time,y = surv, color = enforcer), data = ggdat) + geom_path() + geom_path(aes(x = time,y = lower, color = enforcer), lty = 3) + geom_path(aes(x = time,y = upper, color = enforcer), lty = 3) 
+
+#Diagnostics plots for linearity
+dat$residuals_EF <- coxphmod_EF$residuals
+ggplot(aes(x = GP.x, y = residuals_EF), data = dat) + geom_point() + geom_smooth(color = "red")
+ggplot(aes(x = Ht, y = residuals_EF), data = dat) + geom_point() + geom_smooth(color = "red")
+ggplot(aes(x = Wt, y = residuals_EF), data = dat) + geom_point() + geom_smooth(color = "red")
+ggplot(aes(x = DOB.Year, y = residuals_EF), data = dat) + geom_point() + geom_smooth(color = "red")
+
+
 ```
 
 ```{r}
 cor(dat[,c("PIM.GP_numeric","Ht","Wt","DOB.Year")])
 
-a <- coxph(Surv ~ EP + GP.x + Ht + Wt + DOB.Year + Pos , data = dat)
-summary(a)
+coxphmod_EP <- coxph(Surv ~ EP + GP.x + Ht + Wt + DOB.Year + Pos2 , data = dat)
+summary(coxphmod_EP)
 library(xtable)
-xtable(summary(a)$coef)
+xtable(summary(coxphmod_EP)$coef[,-4],digits = 5)
+cox.zph(coxphmod_EP)
+
+
+newdataEP <-
+  with(dat, data.frame(EP = c(TRUE, FALSE), 
+                       GP.x = rep(mean(GP.x), 2),
+                       Ht = rep(mean(Ht), 2),
+                       Wt = rep(mean(Wt), 2),
+                       DOB.Year = rep(mean(DOB.Year), 2),
+                       I_forward = rep(1, 2))
+                       )
+plot(survfit(coxphmod_EP, newdata = newdataEP), conf.int = TRUE, lty = c(1,2))
+
+
+nnn <- nrow(survfit(coxphmod_EP, newdata = newdataEP)$surv)
+ggdat <- data.frame(enforcer = c(rep("Enforcer",nnn),rep("Non-Enforcer",nnn)),
+  surv = c(
+  survfit(coxphmod_EP, newdata = newdataEP)$surv[, 1],
+  survfit(coxphmod_EP, newdata = newdataEP)$surv[, 2]
+),
+  lower = c(
+  survfit(coxphmod_EP, newdata = newdataEP)$lower[, 1],
+  survfit(coxphmod_EP, newdata = newdataEP)$lower[, 2]
+),
+  upper = c(
+  survfit(coxphmod_EP, newdata = newdataEP)$upper[, 1],
+  survfit(coxphmod_EP, newdata = newdataEP)$upper[, 2]
+),
+time = rep(survfit(coxphmod_EP, newdata = newdataEP)$time,2)
+)
+ggplot(aes(x = time,y = surv, color = enforcer), data = ggdat) + geom_path() + geom_path(aes(x = time,y = lower, color = enforcer), lty = 3) + geom_path(aes(x = time,y = upper, color = enforcer), lty = 3) 
+
+
+
+#Diagnostics plots for linearity
+dat$residuals_EP <- coxphmod_EP$residuals
+ggplot(aes(x = GP.x, y = residuals_EP), data = dat) + geom_point() + geom_smooth(color = "red")
+ggplot(aes(x = Ht, y = residuals_EP), data = dat) + geom_point() + geom_smooth(color = "red")
+ggplot(aes(x = Wt, y = residuals_EP), data = dat) + geom_point() + geom_smooth(color = "red")
+ggplot(aes(x = DOB.Year, y = residuals_EP), data = dat) + geom_point() + geom_smooth(color = "red")
 
 a <- coxph(Surv ~ PIM.GP_numeric  + GP.x + Ht + Wt + DOB.Year + Pos , data = dat)
 summary(a)
