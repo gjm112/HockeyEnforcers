@@ -182,7 +182,14 @@ summ <-
     mnwt = round(mean(Wt), 2),
     sewt = round(sd(Wt) / sqrt(n),3),
     mnht = round(mean(Ht), 2),
-    seht = round(sd(Ht) / sqrt(n),3)
+    seht = round(sd(Ht) / sqrt(n),3),
+    mngoals = round(mean(G), 2),
+    segoals = round(sd(G) / sqrt(n),3),
+    mntf = round(mean(Total.Fights), 2),
+    setf = round(sd(Total.Fights) / sqrt(n),3),
+    mnpimgp = round(mean(PIM.GP_numeric), 2),
+    sepimgp = round(sd(PIM.GP_numeric) / sqrt(n),3)
+    
   )
 
 summEP <-
@@ -193,7 +200,13 @@ summEP <-
     mnwt = round(mean(Wt), 2),
     sewt = round(sd(Wt) / sqrt(n),3),
     mnht = round(mean(Ht), 2),
-    seht = round(sd(Ht) / sqrt(n),3)
+    seht = round(sd(Ht) / sqrt(n),3),
+    mngoals = round(mean(G), 2),
+    segoals = round(sd(G) / sqrt(n),3),
+    mntf = round(mean(Total.Fights), 2),
+    setf = round(sd(Total.Fights) / sqrt(n),3),
+    mnpimgp = round(mean(PIM.GP_numeric), 2),
+    sepimgp = round(sd(PIM.GP_numeric) / sqrt(n),3)
   )
 
 
@@ -259,6 +272,7 @@ After removing 4 players who were missing heights, there were `r nrow(dat)` play
  Age (years) & `r summ$mnage[summ$EF]` (`r summ$seage[summ$EF]`) & `r summ$mnage[!summ$EF]` (`r summ$seage[!summ$EF]`) & `r ifelse(round(t.test(dat$age~dat$EF)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$age~dat$EF)$p.value,2))`\\
  Weight (lbs) & `r summ$mnwt[summ$EF]` (`r summ$sewt[summ$EF]`) & `r summ$mnwt[!summ$EF]` (`r summ$sewt[!summ$EF]`) & `r ifelse(round(t.test(dat$Wt~dat$EF)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$age~dat$EF)$p.value,2))`\\
   Height (in) & `r summ$mnht[summ$EF]` (`r summ$seht[summ$EF]`) & `r summ$mnht[!summ$EF]` (`r summ$seht[!summ$EF]`) & `r ifelse(round(t.test(dat$Ht~dat$EF)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$Ht~dat$EF)$p.value,2))`\\
+    Goals  & `r summ$mngoals[summ$EF]` (`r summ$segoals[summ$EF]`) & `r summ$mngoals[!summ$EF]` (`r summ$segoals[!summ$EF]`) & `r ifelse(round(t.test(dat$G~dat$EF)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$G~dat$EF)$p.value,2))`\\
  \hline
 \end{tabular}
 \end{center}
@@ -343,7 +357,7 @@ Two Cox proportional hazards models [CITATION] were fit: one for each definition
 
 Table \ref{tab:EF} shows the results for the Cox model when enforcers were defined based on their number of career fights.  No statistically significant difference was observed in the hazard functions of enforcers versus non enforcers (p-value = 0.54856).  
 
-However, a significant difference is observed in between enforcers and non-enforcers when the enforcers is defined based on their number of penalty minutes per game (p-value = 0.00169).  The estimated effect for E-P is 0.83023.  When exponentiated, this value is 2.29385, indicating approximately a 129\% increase in the hazard for enforers vs non-enforcers when all other variables are held constant.  Fixing the levels of the continuous predictors at their mean values and fixing position to be defender, the estimated survival rate at the age of 50 for enforcers is 96.57\% (95\% CI: 94.63\%, 98.56\%)  vs 98.49\% (95\% CI: 97.98\%, 0.99.00\%).  For the same conditions at the age of 75, the estimated survival rate for enforcers is about 74.4\% (95\% CI: 61.4\%, 90.32\%) compared to non-enforcers estimate survival rate of 87.95\% (95\% CI: 83.09\%, 93.10\%).  
+However, a significant difference is observed in between enforcers and non-enforcers when the enforcers is defined based on their number of penalty minutes per game (p-value = 0.00169).  The estimated effect for E-P is 0.83023.  When exponentiated, this value is 2.29385, indicating approximately a 129\% increase in the hazard for enforcers vs non-enforcers when all other variables are held constant.  Fixing the levels of the continuous predictors at their mean values and fixing position to be defender, the estimated survival rate at the age of 50 for enforcers is 96.57\% (95\% CI: 94.63\%, 98.56\%) vs 98.49\% (95\% CI: 97.98\%, 99.00\%).  For the same conditions at the age of 75, the estimated survival rate for enforcers is about 74.4\% (95\% CI: 61.4\%, 90.32\%) compared to non-enforcers estimate survival rate of 87.95\% (95\% CI: 83.09\%, 93.10\%).  
 
 <!-- ind surv lower upper time -->
 <!-- Non-Enforcer 0.9849056 0.9798140 0.9900238 50.00000 -->
