@@ -212,8 +212,6 @@ summEP <-
 
 ```   
 
-\newpage
-
 # Introduction {#sec:intro}
 
 Fighting in the National Hockey League (NHL) has been an integral part of the sport since the earliest days of the league. More than just a way to express frustration, players often use fighting strategically to the benefit of the team. One of these strategies includes instigating a fight when a player from the opposite team has violated an unwritten rule of the game. This has led to the rise of teams carrying so called "enforcers" on their rosters. An enforcer is a `r gjm("member of a hockey team")` who, along with being a regular player, is the one tasked with fighting these opposing players. This is not an officially defined position, of course, but the nature of needing to be able to fight any opponent generally designates the players most likely to be enforcers (large, dense `r gjm("Dense?  Is that the right word here?")` , intimidating players). 
@@ -222,7 +220,7 @@ Fighting in the National Hockey League (NHL) has been an integral part of the sp
 
 @Colburn1986 discusses the intentionality behind these public fights. The crowd gets energized and entertained, but more importantly, the fight is a stage used to establish the social customs and expectations of players on the ice.  (Colburn 70) says,  "insofar as the fist-fight is the locus of socially available beliefs concerning the moral character and integrity of players, ... the fist-fight represents a mode of informal social control among players" . 
 
-`r gjm('You don't say "He says...." in a paper".  You say: "[citation] says..."'  )`
+`r gjm('You dont say "He says...." in a paper".  You say: "[citation] says..."'  )`
 
 A researcher `r gjm('Which researcher? Silverwood?')` who looked anecdotally at how enforcers fit into a team atmosphere noticed that teammates put their enforcers on a pedestal. Performing well as an enforcer leads to the player being seen as a protector. When an enforcer fulfills these additional responsibilities to being on the ice as a normal player, players say that it is common for that enforcer to receive perks, such as not paying for their own meals or getting the best seat on the bus. They go as far as to say these players are "deified", emphasizing the social aspects of hockey that surround this history of violence. (Silverwood 2015).  
 
@@ -241,6 +239,11 @@ Inspired by the applicability of survival analysis to this study, and concerned 
 
 As mentioned earlier, the outcome of this study is relevant to the debates about regulations and discourse around head trauma in hockey. An accurate analysis is imperative to prevent the spread of misinformed conclusions. ... talk about our conclusions
 
+<!-- In the matched cohort study presented in @Popkin2023, enforcers were matched to non-enforcers on birth year, weight, height, etc.  After matching, mortality rates between the two groups were computed.  Neither definition of enforcers (i.e. E-F or E-P) yielded significant difference in the mortality rates between enforcers and non-enforcers.   -->
+
+<!-- <!-- (Greg comment: After matching you CAN compare mortality rates and that comparison would be valid AT THAT GIVEN POINT when they are compared.  But a better analysis would be to use survival analysis.  The problem with mortality rate is that eventually everyone in both groups will be dead if you wait long enough and that comparison is meaningless. Survival times are much better comparison. ) --> -->
+
+<!-- However, the authors of @Popkin2023 next conditioned on death yielding a sample size of n = 13 and n = 14 for the enforcer (defined by total fights) vs non-enforcer group, respectively, and show that the age at death is about 10 years less for the enforcers group relative to the non-enforcer group (p = 0.03).  This approach is not statistically valid, since once death is conditioned upon, the matching that is used to balance the two groups is broken and they can become imbalanced, which is what we believe the authors in @Popkin2023 observed.  -->
 
 <!-- Interesting paper: Don't do PS matching: https://gking.harvard.edu/publications/why-propensity-scores-should-not-be-used-formatching -->
 
@@ -262,9 +265,9 @@ The same definitions of enforceres presented in @Popkin2023 are used this curren
 
 While @Popkin2023 only looks at a total of 45 deceased players  (21 enforcers and 24 controls), we scraped hockey-reference.com and identified `r sum(dat$dead)` players who were included in the data used in @Popkin2023 who were deceased as of May 7, 2023.  The analysis presented here will utilize all hockey players in the data used in @Popkin2023, both alive and deceased, in a survival analysis to explore differences in survival times between enforcers an non-enforcers.  
 
-# Descriptive statistics
 
-After removing 4 players who were missing heights, there were `r nrow(dat)` players included in our analysis.  Of these players, on average, enforcers in this data set tended to be older than the non-enforcers (EF: `r summ$mnage[summ$EF]` vs non-EF: `r summ$mnage[!summ$EF]` and EP: `r summEP$mnage[summEP$EP]` vs non-EP: `r summEP$mnage[!summEP$EP]`).  Additionally, as seen in Tables \ref{EDAEF} and \ref{EDAEP} enforcers tended to also be taller and heavier on average than non-enforcers
+
+
 	
 
 <!-- add a table here with summary statistics comparing the groups EF and EP.-->
@@ -276,6 +279,7 @@ After removing 4 players who were missing heights, there were `r nrow(dat)` play
 \hline
  Variable & EF = TRUE & EF = FALSE & p-value \\
  \hline
+ n & `r summ$n[summ$EF]` & `r summ$n[!summ$EF]` & \\
  Age (years) & `r summ$mnage[summ$EF]` (`r summ$seage[summ$EF]`) & `r summ$mnage[!summ$EF]` (`r summ$seage[!summ$EF]`) & `r ifelse(round(t.test(dat$age~dat$EF)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$age~dat$EF)$p.value,2))`\\
  Weight (lbs) & `r summ$mnwt[summ$EF]` (`r summ$sewt[summ$EF]`) & `r summ$mnwt[!summ$EF]` (`r summ$sewt[!summ$EF]`) & `r ifelse(round(t.test(dat$Wt~dat$EF)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$age~dat$EF)$p.value,2))`\\
   Height (in) & `r summ$mnht[summ$EF]` (`r summ$seht[summ$EF]`) & `r summ$mnht[!summ$EF]` (`r summ$seht[!summ$EF]`) & `r ifelse(round(t.test(dat$Ht~dat$EF)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$Ht~dat$EF)$p.value,2))`\\
@@ -283,8 +287,7 @@ After removing 4 players who were missing heights, there were `r nrow(dat)` play
  \hline
 \end{tabular}
 \end{center}
-\label{EDAEF}
-\caption{test}
+\caption{test \label{tab:EDAEF}}
 \end{table}
 
 
@@ -294,15 +297,22 @@ After removing 4 players who were missing heights, there were `r nrow(dat)` play
 \hline
  Variable & EP = TRUE & EP = FALSE & p-value \\
  \hline
+ n & `r summEP$n[summEP$EP]` & `r summEP$n[!summEP$EP]` & \\
+  GP & `r summEP$mnage[summEP$EP]` (`r summEP$seage[summEP$EP]`) & `r summEP$mnage[!summEP$EP]` (`r summEP$seage[!summEP$EP]`) & `r ifelse(round(t.test(dat$age~dat$EP)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$age~dat$EP)$p.value,2))`\\
  Age (years) & `r summEP$mnage[summEP$EP]` (`r summEP$seage[summEP$EP]`) & `r summEP$mnage[!summEP$EP]` (`r summEP$seage[!summEP$EP]`) & `r ifelse(round(t.test(dat$age~dat$EP)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$age~dat$EP)$p.value,2))`\\
  Weight (lbs) & `r summEP$mnwt[summEP$EP]` (`r summEP$sewt[summEP$EP]`) & `r summEP$mnwt[!summEP$EP]` (`r summEP$sewt[!summEP$EP]`) & `r ifelse(round(t.test(dat$Wt~dat$EP)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$age~dat$EP)$p.value,2))`\\
   Height (in) & `r summEP$mnht[summEP$EP]` (`r summEP$seht[summEP$EP]`) & `r summEP$mnht[!summEP$EP]` (`r summEP$seht[!summEP$EP]`) & `r ifelse(round(t.test(dat$Ht~dat$EP)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$Ht~dat$EP)$p.value,2))`\\
+      Goals  & `r summEP$mngoals[summEP$EP]` (`r summEP$segoals[summEP$EP]`) & `r summEP$mngoals[!summEP$EP]` (`r summEP$segoals[!summEP$EP]`) & `r ifelse(round(t.test(dat$G~dat$EP)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$G~dat$EP)$p.value,2))`\\
  \hline
 \end{tabular}
 \end{center}
-\label{EDAEP}
-\caption{Here is the caption for this table}
+
+\caption{Here is the caption for this table \label{tab:EDAEP}}
 \end{table}
+
+After removing 4 players who were missing heights, there were `r nrow(dat)` players included in our analysis.  Of these players, on average, enforcers in this data set tended to be older than the non-enforcers (EF: `r summ$mnage[summ$EF]` vs non-EF: `r summ$mnage[!summ$EF]` and EP: `r summEP$mnage[summEP$EP]` vs non-EP: `r summEP$mnage[!summEP$EP]`).  Additionally, as seen in Tables \ref{tab:EDAEF} and \ref{tab:EDAEP} enforcers tended to also be taller and heavier on average than non-enforcers. The means of age, weight, height and goals are all significantly different between the enforcers and non-enforcer groups for both defintions of enforcers.  
+
+
 
 ```{r echo = FALSE}
 library(survival)
@@ -321,7 +331,7 @@ dat$Pos2[dat$Pos2 %in% c("L","R")] <- "W"
 dat$Pos2 <- factor(dat$Pos2)
 ```
 
-```{r fig:KMEF, echo = FALSE, fig.cap="Kaplan Meier plot for EF" }
+```{r KMEF, echo = FALSE, fig.cap="Kaplan Meier plot for EF" }
 library(ggsurvfit)
 survfit2(Surv ~ EFchar, data = dat) %>%
   ggsurvfit() +
@@ -332,7 +342,7 @@ survfit2(Surv ~ EFchar, data = dat) %>%
   add_confidence_interval()
 ```
 
-```{r fig:KMEp, echo = FALSE, fig.cap="Kaplan Meier plot for EP" }
+```{r KMEP, echo = FALSE, fig.cap="Kaplan Meier plot for EP" }
 library(ggsurvfit)
 survfit2(Surv ~ EPchar, data = dat) %>% 
   ggsurvfit() +
@@ -343,16 +353,12 @@ survfit2(Surv ~ EPchar, data = dat) %>%
   add_confidence_interval()
 ```
 
-Figures \@ref(KMEF) and \@ref(KMEP) show Kaplan-Meier plots for EF and EP
+Figures \ref{fig:KMEF} and \ref{fig:KMEP} show Kaplan-Meier plots for EF and EP.  Whiel there is a substantial amount of overlap between the K-M curves between the enforcer and non-enforcers groups when enforcers is defined using the EF criteria, the enforcer group when defined by the EP criteria shows lower survival probabilities starting around age 50 relative to the non-enforcer group.  Though it is important to remember that these two groups differ substantially in age, height, and weight.
 
 # Methods {#sec:methods}
-In the matched cohort study presented in @Popkin2023, enforcers were matched to non-enforcers on birth year, weight, height, etc.  After matching, mortality rates between the two groups were computed.  Neither definition of enforcers (i.e. E-F or E-P) yielded significant difference in the mortality rates between enforcers and non-enforcers.  
+Rather than focusing on mortality rates, as in @popkin2023, instead the focus here is to perform a re-analysis of the original study using survival analysis techniques, specifically Cox proportional hazards models, to look for differences in survival times of enforcers versus non-enforcers.  [[Why do we think survival analysis is the correct choice for analyzing this data.  Explain.  ]]
 
-<!-- (Greg comment: After matching you CAN compare mortality rates and that comparison would be valid AT THAT GIVEN POINT when they are compared.  But a better analysis would be to use survival analysis.  The problem with mortality rate is that eventually everyone in both groups will be dead if you wait long enough and that comparison is meaningless. Survival times are much better comparison. ) -->
 
-However, the authors of @Popkin2023 next conditioned on death yielding a sample size of n = 13 and n = 14 for the enforcer (defined by total fights) vs non-enforcer group, respectively, and show that the age at death is about 10 years less for the enforcers group relative to the non-enforcer group (p = 0.03).  This approach is not statistically valid, since once death is conditioned upon, the matching that is used to balance the two groups is broken and they can become imbalanced, which is what we believe the authors in @Popkin2023 observed.  
-
-This current manuscript aims to perform a re-analysis of the original study using survival analysis techniques, specifically Cox proportional hazards models, to look for differences in survival times of enforcers versus non-enforcers.  
 
 <!-- Greg doesn't think this conditioning on death is valid!  The point of matching is to balance the groups in regards to confounders.  However, after matching, you can't just look at a subset and compare between then two groups because you could end up with unbalanced sets!  And indeed we do see this!  For example, the weight in the dead enforcers group is on average higher than the weight of the dead non-enforcers group.   -->
 
@@ -360,7 +366,7 @@ This current manuscript aims to perform a re-analysis of the original study usin
 
 
 # Results {#sec:results}
-Two Cox proportional hazards models [CITATION] were fit: one for each definition of enforcer defined in @Popkin2023 (i.e. E-F and E-P).  In addition, to indicators for each definition of enforcer, games played (GP), height (Ht), weight (Wt), year of birth (DOB), and position (Center (C), Wing (W), or Defender(D)) were added to each model as control variables.  
+Two Cox proportional hazards models @CoxPH were fit: one for each definition of enforcer defined in @Popkin2023 (i.e. E-F and E-P) with time until death as the response variable.  In addition, to indicators for each definition of enforcer, games played (GP), height (Ht), weight (Wt), year of birth (DOB), and position (Center (C), Wing (W), or Defender(D)) were added to each model as control variables. 
 
 Table \ref{tab:EF} shows the results for the Cox model when enforcers were defined based on their number of career fights.  No statistically significant difference was observed in the hazard functions of enforcers versus non enforcers (p-value = 0.54856).  
 
@@ -391,8 +397,7 @@ E-F TRUE & 0.17328 & 1.18920 & 0.28884 & 0.54856 \\
   $I_W$ & -0.25905 & 0.77178 & 0.15869 & 0.10258 \\ 
    \hline
 \end{tabular}
-\caption{E-F}
-\label{tab:EF}
+\caption{E-F \label{tab:EF}}
 \end{table}
 
 
@@ -416,8 +421,7 @@ E-P TRUE & 0.83023 & 2.29385 & 0.26443 & 0.00169 \\
    \hline
    \hline
 \end{tabular}
-\caption{E-P}
-\label{tab:EP}
+\caption{E-P \label{tab:EP}}
 \end{table}
 
 Figure \@ref(fig:estsurv)
