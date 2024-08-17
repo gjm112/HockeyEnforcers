@@ -27,7 +27,10 @@ author: |
   | \normalsize Chicago, IL 60660 \vspace{-1mm}
   | \normalsize [`gmatthews1@luc.edu`](mailto:gmatthews1@luc.edu) \vspace{-1mm}
 abstract: |
-  | The abstract goes here. \vspace{2mm}
+Fighting and Penalty Minutes Associated With Long-term Mortality Among National Hockey League Players, 1967 to 2022
+  | A recent study looked at the relationship between long-term mortality and being an enforcer in the National Hockey League.  Specifically, that  study presented a matched cohort study that found that NHL enforcers (defined based on number of career fights or average career penalty minutes) died an everage of 10 years earlier
+
+     \vspace{2mm}
   | Keywords: survival analysis, hockey
 bibliography: references.bib
 fontsize: 12pt
