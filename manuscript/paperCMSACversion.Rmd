@@ -2,37 +2,12 @@
 title: |
   |  \large Enforcers are fine, probably.  
 author: | 
-  | \large Zach Binney \vspace{-1.1mm}
-  | \normalsize Epi \vspace{-1mm}
-  | \normalsize Oxford something at Emory \vspace{-1mm}
-  | \normalsize Georgia? \vspace{-1mm}
-  | \normalsize [`email`](mailto:ypu@something.edu) \vspace{-1mm}
-  |
-  | \large Brian M. Mills \vspace{-1.1mm}
-  | \normalsize College of Education \vspace{-1mm}
-  | \normalsize University of Texas at Austin \vspace{-1mm}
-  | \normalsize Austin, TX 78712 \vspace{-1mm}
-  | \normalsize [`brian.mills@austin.utexas.edu`](mailto:brian.mills@austin.utexas.edu) \vspace{-1mm}
-  |
-  | \large Leigha DeRango \vspace{-1.1mm}
-  | \normalsize Department of Mathematics and Statistics \vspace{-1mm}
-  | \normalsize Loyola University Chicago \vspace{-1mm}
-  | \normalsize Chicago, IL 60660 \vspace{-1mm}
-  | \normalsize [`lderango@luc.edu`](mailto:lderango@luc.edu) \vspace{-1mm}
-  |
-  | \large Gregory J. Matthews \vspace{-1.1mm}
-  | \normalsize Department of Mathematics and Statistics \vspace{-1mm}
-  | \normalsize Center for Data Science and Consulting \vspace{-1mm}
-  | \normalsize Loyola University Chicago \vspace{-1mm}
-  | \normalsize Chicago, IL 60660 \vspace{-1mm}
-  | \normalsize [`gmatthews1@luc.edu`](mailto:gmatthews1@luc.edu) \vspace{-1mm}
 abstract: |
- |Fighting and Penalty Minutes Associated With Long-term Mortality Among National Hockey League Players, 1967 to 2022
- | A recent study looked at the relationship between long-term mortality and being an enforcer in the National Hockey League.  Specifically, that  study presented a matched cohort study that found that NHL enforcers (defined based on number of career fights or average career penalty minutes) died an everage of 10 years earlier
+ | A recent study looked at the relationship between long-term mortality and being an enforcer in the National Hockey League between 1967 and 2022.  They performed a matched cohort study that found no significant difference in the mortality rates of enforcers versus non-enforcers (where “enforcer” is defined based on number of career fights or average career penalty minutes).  They then perform an additional sub-analysis conditioning on players that were currently deceased and looking at just this subset of players, they find a significant difference in the mean age at death between the enforcers and non-enforcers groups (45.2 vs 55.2; p-value= 0.02) thus reaching the conclusion that enforcers died an average of 10 years earlier than non-enforcers. However, some of the statistical methods used to reach their conclusions were unconvincing, specifically the approach used to reach this last claim.  Therefore, we undertook a re-analysis of their study using a survival analysis approach, which we believe is the natural method to use to study this question.  In addition, we augmented their data by scraping hockey-reference to find more instances of players who were deceased.  Then, using a Cox proportional hazards model, we found no significant difference in survival rate between enforcers and non-enforcers when an enforcer was defined based on the number of career fights.  However, when an enforcer was defined by average career penalty minutes, a significant difference was observed, which was notably not found in the original article.  Specifically, we find an estimated hazard ratio of enforcers to non-enforcers of 2.29 (p-value: 0.00169).  Therefore, we agree with the sentiment of the original paper that there is some difference between survival of these two groups, but we believe our approach to estimating this effect is more appropriate and that the magnitude of the effect in the original article is overstated.The 
   \vspace{2mm}
   | Keywords: survival analysis, hockey
 bibliography: references.bib
-fontsize: 12pt
+fontsize: 10pt
 link-citations: true
 linkcolor: cyan
 urlcolor: cyan
@@ -43,7 +18,7 @@ output:
     keep_tex: true
 header-includes:
  \usepackage{setspace}
- \setstretch{1.15}
+ \setstretch{1}
  \usepackage{float}
  \floatplacement{figure}{t}
 ---
@@ -140,7 +115,7 @@ gen_JAMA$PIM <- as.numeric(gsub(",","",gen_JAMA$PIM))
 dead$GP <- as.numeric(dead$GP)
 dead$From <- as.numeric(dead$From)
 dead$G <- as.numeric(dead$G)
-gen_JAMA %>% filter(X1st.Season.Corrected >= 1967) %>% nrow()
+#gen_JAMA %>% filter(X1st.Season.Corrected >= 1967) %>% nrow()
 dat <- gen_JAMA %>% filter(X1st.Season.Corrected >= 1967) %>% left_join(select(dead,Name,Birth.Date,Death.Date,GP),by = c("Player" = "Name" ))
 
 #Remove goalies 
@@ -216,30 +191,36 @@ summEP <-
 
 # Introduction {#sec:intro}
 
-Fighting in the National Hockey League (NHL) has been an integral part of the sport since the earliest days of the league. More than just a way to express frustration, players often use fighting strategically to the benefit of the team. One of these strategies includes instigating a fight when a player from the opposite team has violated an unwritten rule of the game. This has led to the rise of teams carrying so called "enforcers" on their rosters. An enforcer is a `r gjm("member of a hockey team")` who, along with being a regular player, is the one tasked with fighting these opposing players. This is not an officially defined position, of course, but the nature of needing to be able to fight any opponent generally designates the players most likely to be enforcers (large, dense `r gjm("Dense?  Is that the right word here?")` , intimidating players). 
+Fighting in the National Hockey League (NHL) has been an integral part of the sport since the earliest days of the league. More than just a way to express frustration, players often use fighting strategically to the benefit of the team. One of these strategies includes instigating a fight when a player from the opposite team has violated an unwritten rule of the game, which historically has led to hockey teams carrying so called "enforcers" on their rosters. An enforcer is a member of a hockey team who, along with being a regular player, is the one tasked with fighting these opposing players. This is not an officially defined position but the nature of needing to be able to fight any opponent generally designates the players most likely to be enforcers. 
 
-`r gjm('In the previous paragaph, when you say "This has led to a rise..." it makes it sound like this is a recent phenomenom.  It is not.  Make this clearer.'  )`
+@Colburn1986 discusses the intentionality behind these public fights. The crowd gets energized and entertained, but more importantly, the fight is a stage used to establish the social customs and expectations of players on the ice.  Specifically, they say, "insofar as the fist-fight is the locus of socially available beliefs concerning the moral character and integrity of players, ... the fist-fight represents a mode of informal social control among players" . 
 
-@Colburn1986 discusses the intentionality behind these public fights. The crowd gets energized and entertained, but more importantly, the fight is a stage used to establish the social customs and expectations of players on the ice.  (Colburn 70) says,  "insofar as the fist-fight is the locus of socially available beliefs concerning the moral character and integrity of players, ... the fist-fight represents a mode of informal social control among players" . 
+@Silverwood2015 looked anecdotally at how enforcers fit into a team atmosphere noticed that teammates put their enforcers on a pedestal. Performing well as an enforcer leads to the player being seen as a protector. When an enforcer fulfills these additional responsibilities to being on the ice as a normal player, players say that it is common for that enforcer to receive perks, such as not paying for their own meals or getting the best seat on the bus. They go as far as to say these players are "deified", emphasizing the social aspects of hockey that surround this history of violence. 
 
-`r gjm('You dont say "He says...." in a paper".  You say: "[citation] says..."'  )`
+While any player on a hockey team can get into a fight, enforcers are exposed to many more fights than the typical NHL player. As a result of being exposed to these fights, they are potentially exposed to additional head trauma beyond the amount associated with playing hockey. There are many questions about the long-term implications of this head trauma, and if it may have any health effects on these types of players. The ingrained nature of fighting into the game of hockey is greatly criticized and there are many active debates about its current declining trend (can we cite something that shows the trend is declining?). Should the game continue to move away from fighting in favor of younger, faster, highly-skilled players? Objectively, however, fighting has historically been a non-negligible part of the game and correctly understanding the implications this has on player health may help direct the future of the sport. 
 
-A researcher `r gjm('Which researcher? Silverwood?')` who looked anecdotally at how enforcers fit into a team atmosphere noticed that teammates put their enforcers on a pedestal. Performing well as an enforcer leads to the player being seen as a protector. When an enforcer fulfills these additional responsibilities to being on the ice as a normal player, players say that it is common for that enforcer to receive perks, such as not paying for their own meals or getting the best seat on the bus. They go as far as to say these players are "deified", emphasizing the social aspects of hockey that surround this history of violence. (Silverwood 2015).  
+Recently, @Popkin2023 explored the effects of being an enforcer on mortality rates, ages at death, and causes of death. They defined enforcers in two ways: (1) those who had 50 or more career fights (E-F cohort) and (2) those who had, on average, more than 3 penalty minutes per game (E-P cohort). 
 
-While any player on a hockey team can get into a fight, enforcers are exposed to many more fights than your everyday average NHL player. As a result of being exposed to these fights, they are `r gjm('exposed to')` additional head trauma, above and beyond the normal head trauma associated with hockey. There are many questions about the long-term implications of this head trauma, and if it may have any health effects on these types of players. The ingrained nature of fighting into the game of hockey is greatly criticized and there are many active debates about its current declining trend. Should the game continue to move away from fighting in favor of younger, faster, highly-skilled players? Undebatably, however, fighting has historically been a non-negligible part of the game and correctly understanding the implications this has on player health may help direct the future of the sport. 
+Based on their analysis (a matched cohort study) they find that there is no statistically significant difference in the mortality rates of between enforcers and controls for either definition of enforcer, but they do conclude that enforcers died on average about 10 years earlier than their non-enforcer counterparts.  In addition, they go on to draw the conclusion that there is not a significant difference in all-cause mortality rate but find enforcers died more frequently of drug overdose and suicide. 
 
-`r gjm('undebatably?  is that a word?')`
+However, we believe that some of the methods used in @Popkin2023 to reach these conclusions are not statistically appropriates.  Most notably, the method used to reached their most sensational finding - enforcers died on average about 10 years earlier than their non-enforcer counterparts - is statistically unsuitable.  Specifically, to reach this conclusion they use the data in the matched cohort study, but then condition on death.  This effectively breaks the matching that they appropriately used to compare mortality rates, and therefor this conclusion is not statistically valid.  
 
-@Popkin2023, et al. explored the effects of being an enforcer on mortality rates and causes of death. They defined enforcers in two groups: those who had 50 or more career fights (E-F cohort), and those who had, on average, more than 3 penalty minutes per game (E-P cohort). Then, each of these players was matched to a non-enforcer counterpart based on date of birth, total games played, height, weight, and position played (C-F and C-P cohorts, respectively). These matched controls were then tested to confirm that there were not any significant differences between the variables matched on between the controls and group. `r gjm('They were looking for differences in mortality rate?  Did they use a chi square test?'  )`
-
-Their analysis continues by considering the E-F cohort and their matched controls separately from the E-P cohort. Conditioning on death, they then estimated, separately, that the enforcer groups from each cohort (E-F = 13, E-P = 13) died on average 10 years before their non-enforcer counterparts(C-F = 14, C-P = 10). Then, considering all enforcers from both cohorts together, and all controls from both cohorts together, and then conditioning on death (resulting in 21 enforcers and 24 controls), they draw the conclusion that there is not a significant difference in all-cause mortality rate but that enforcers died more frequently of drug overdose and suicide. 
-`r gjm("Lets make this above paragraph clearer")`
-
-If true, this is truly an alarming finding.  However, upon examining their statistical methods and attempting to reproduce their results using a survival analysis approach, which we believe is more appropriate, we were unable to reach the same conclusions as @Popkin2023.  
-
-Inspired by the applicability of survival analysis to this study, and concerned about the gravity of @Popkin2023's conclusions in light of the statistical methods originally used, we instead found more data using web-scraping methods and the NHL website to facilitate a reanalysis of the effects of being an enforcer in terms of survival time rather than mortality rate. This shift in perspective allows us to overcome the downfall of mortality rate, which is that it is a function of when it is calculated. Eventually, the mortality rate will always be 100% when all members of the original sample have died. Instead, survival analysis provides a survival curve, which can be used to analyze how the probability of survival changes over time. 
+Here, we attempt to replicate the results of the analysis in @Popkin2023, but what we believe to be more appropriate statistical analysis, specifically survival analysis methodology.  This shift in perspective allows us to overcome the weakness of mortality rate, which is that it is a function of when it is calculated (i.e. Eventually, the mortality rate will always be 100% when all members of the original sample have died). Instead, survival analysis provides a survival curve, which can be used to analyze how the probability of survival changes over time.  In addition, we augmented the data used in @Popkin2023 to increase the sample size in the analysis and include more deceased players in the data set. 
 
 As mentioned earlier, the outcome of this study is relevant to the debates about regulations and discourse around head trauma in hockey. An accurate analysis is imperative to prevent the spread of misinformed conclusions. ... talk about our conclusions
+
+<!-- we instead found more data using web-scraping methods and the NHL website to facilitate a reanalysis of the effects of being an enforcer in terms of survival time rather than mortality rate. This shift in perspective allows us to overcome the downfall of mortality rate, which is that it is a function of when it is calculated. Eventually, the mortality rate will always be 100% when all members of the original sample have died. Instead, survival analysis provides a survival curve, which can be used to analyze how the probability of survival changes over time.  -->
+
+<!-- Inspired by the applicability of survival analysis to this study, and concerned about the gravity of @Popkin2023's conclusions in light of the statistical methods originally used, we instead found more data using web-scraping methods and the NHL website to facilitate a reanalysis of the effects of being an enforcer in terms of survival time rather than mortality rate. This shift in perspective allows us to overcome the downfall of mortality rate, which is that it is a function of when it is calculated. Eventually, the mortality rate will always be 100% when all members of the original sample have died. Instead, survival analysis provides a survival curve, which can be used to analyze how the probability of survival changes over time.  -->
+
+
+
+ 
+ <!-- Then, each of these enforcer players was matched to a non-enforcer counterpart based on date of birth, total games played, height, weight, and position played (C-F and C-P cohorts, respectively).  -->
+
+<!-- Their analysis continues by considering the E-F cohort and their matched controls separately from the E-P cohort. Conditioning on death, they then estimated, separately, that the enforcer groups from each cohort (E-F = 13, E-P = 13) died on average 10 years before their non-enforcer counterparts(C-F = 14, C-P = 10). Then, considering all enforcers from both cohorts together, and all controls from both cohorts together, and then conditioning on death (resulting in 21 enforcers and 24 controls), they draw the conclusion that there is not a significant difference in all-cause mortality rate but that enforcers died more frequently of drug overdose and suicide.  -->
+<!-- `r gjm("Lets make this above paragraph clearer")` -->
+
 
 <!-- In the matched cohort study presented in @Popkin2023, enforcers were matched to non-enforcers on birth year, weight, height, etc.  After matching, mortality rates between the two groups were computed.  Neither definition of enforcers (i.e. E-F or E-P) yielded significant difference in the mortality rates between enforcers and non-enforcers.   -->
 
@@ -254,23 +235,42 @@ As mentioned earlier, the outcome of this study is relevant to the debates about
 <!-- colburn: https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1533-8525.1986.tb00249.x -->
 
 # Data 
-We obtained the two data sets used in @Popkin2023: general table (n = 7432) and death table (n = 45).  After filtering for players who's first season was 1967 or greater, there are 6039 observations remaining (the exact number mentioned in @Popkin2023).  
+We obtained the two data sets used in @Popkin2023: general table (n = 7,432) and death table (n = 45).  As in @Popkin2023, we considered only players who'd first season was 1967 or later and played any games between the 1967-68 and the 2021-22 NHL seasons.  This leaves 6,039 players after filtering (the exact number mentioned in @Popkin2023).  We then removed 4 players with missing height, leaving us with 6,035 remaining observations for out re-analysis.  
 
-@Popkin2023 presents a matched cohort study with n = 6039 NHL players who played any games between the 1967-68 and the 2021-22 NHL seasons.  (We removed 4 players with missing values for height leaving us with 6035 observations for analysis.)  They then define a player as an enforcer in one of two ways: 
+For direct comparison to @Popkin2023, we defined enforcers using the same two definitions that they used: 
+ 1. Enforcers-Fights (E-F): Any player with at least 50 career fights (n = 331)
+ 2. Enforcers-Penalty Minutes (E-P): Any player who averaged at least 3 penalty minutes per game (n = 183)
+ 
+We note than in @Popkin2023, they find 183 E-P enforcers; we have only 182 in our data set (check that this is because of the missing height issue.)
 
-1. EF: Any player with at least 50 career fights (n = 331)
-2. EP: Any player who averaged at least 3 penalty minutes per game (n = 183)
+While @Popkin2023 only looks at a total of 45 deceased players  (21 enforcers and 24 controls), we scraped hockey-reference.com and identified `r sum(dat$dead)` players who were included in the data used in @Popkin2023 who were deceased as of May 7, 2023.  The analysis presented here will utilize all hockey players in the data used in, both alive and deceased, in a survival analysis to explore differences in survival times between enforcers an non-enforcers, which we believe to be a more appropriate statistical method for this setting.  
 
-The same definitions of enforceres presented in @Popkin2023 are used this current manuscript for comparison purposes.  
+\begin{table}
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+ Variable & mean (sd)\\
+ \hline
+ n & `r nrow(dat)`    \\
+ n deceased & `r sum(dat$dead)` (`r paste0(round(100*sum(dat$dead)/nrow(dat),2),"\\%")`)    \\
+ Age (Years) & `r round(mean(as.numeric(dat$age)),2)` (`r round(sd(as.numeric(dat$age)),2)`)\\
+ Height (Inches) & `r round(mean(as.numeric(dat$Ht)),2)` (`r round(sd(as.numeric(dat$Ht)),2)`)\\
+ Weight (Pounds) & `r mean(as.numeric(dat$Wt))` (`r sd(as.numeric(dat$Wt))`)\\
+ Fights per game & `r mean(as.numeric(dat$FperG))` (`r sd(as.numeric(dat$FperG))`)\\
+ Penalty Minutes per game  & `r mean(as.numeric(dat$PIM.GP_numeric))`  (`r  sd(as.numeric(dat$PIM.GP_numeric))`)\\
+ \hline
+\end{tabular}
+\end{center}
+\caption{Overall summary stats \label{tab:EDAoverall}}
+\end{table}
+
+
+
+
+<!-- The same definitions of enforceres presented in @Popkin2023 are used this current manuscript for comparison purposes.   -->
 
 <!-- (Note: In our analysis I only have 182 players who are defined as EP) -->
 
-While @Popkin2023 only looks at a total of 45 deceased players  (21 enforcers and 24 controls), we scraped hockey-reference.com and identified `r sum(dat$dead)` players who were included in the data used in @Popkin2023 who were deceased as of May 7, 2023.  The analysis presented here will utilize all hockey players in the data used in @Popkin2023, both alive and deceased, in a survival analysis to explore differences in survival times between enforcers an non-enforcers.  
-
-
-
-
-	
 
 <!-- add a table here with summary statistics comparing the groups EF and EP.-->
 
@@ -289,7 +289,7 @@ While @Popkin2023 only looks at a total of 45 deceased players  (21 enforcers an
  \hline
 \end{tabular}
 \end{center}
-\caption{test \label{tab:EDAEF}}
+\caption{Comparing enforcers to non enforcers when enforcer is defined as E-F \label{tab:EDAEF}}
 \end{table}
 
 
@@ -309,7 +309,7 @@ While @Popkin2023 only looks at a total of 45 deceased players  (21 enforcers an
 \end{tabular}
 \end{center}
 
-\caption{Here is the caption for this table \label{tab:EDAEP}}
+\caption{Comparing enforcers to non enforcers when enforcer is defined as E-F \label{tab:EDAEP}}
 \end{table}
 
 After removing 4 players who were missing heights, there were `r nrow(dat)` players included in our analysis.  Of these players, on average, enforcers in this data set tended to be older than the non-enforcers (EF: `r summ$mnage[summ$EF]` vs non-EF: `r summ$mnage[!summ$EF]` and EP: `r summEP$mnage[summEP$EP]` vs non-EP: `r summEP$mnage[!summEP$EP]`).  Additionally, as seen in Tables \ref{tab:EDAEF} and \ref{tab:EDAEP} enforcers tended to also be taller and heavier on average than non-enforcers. The means of age, weight, height and goals are all significantly different between the enforcers and non-enforcer groups for both defintions of enforcers.  
