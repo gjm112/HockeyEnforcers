@@ -235,7 +235,8 @@ As mentioned earlier, the outcome of this study is relevant to the debates about
 <!-- colburn: https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1533-8525.1986.tb00249.x -->
 
 # Data 
-We obtained the two data sets used in @Popkin2023: general table (n = 7,432) and death table (n = 45).  As in @Popkin2023, we considered only players who'd first season was 1967 or later and played any games between the 1967-68 and the 2021-22 NHL seasons.  This leaves 6,039 players after filtering (the exact number mentioned in @Popkin2023).  We then removed 4 players with missing height, leaving us with 6,035 remaining observations for out re-analysis.  
+## Data from orignal paper
+We obtained the two data sets used in @Popkin2023: general table (n = 7,432) and death table (n = 45).  As in @Popkin2023, we considered only players who'd first season was 1967 or later and played any games between the 1967-68 and the 2021-22 NHL seasons.  This leaves 6,039 players after filtering (the exact number mentioned in @Popkin2023).  We then removed 4 players with missing height, leaving us with `r nrow(dat)` (6,035) remaining observations for out re-analysis. 
 
 For direct comparison to @Popkin2023, we defined enforcers using the same two definitions that they used: 
  1. Enforcers-Fights (E-F): Any player with at least 50 career fights (n = 331)
@@ -243,7 +244,15 @@ For direct comparison to @Popkin2023, we defined enforcers using the same two de
  
 We note than in @Popkin2023, they find 183 E-P enforcers; we have only 182 in our data set (check that this is because of the missing height issue.)
 
-While @Popkin2023 only looks at a total of 45 deceased players  (21 enforcers and 24 controls), we scraped hockey-reference.com and identified `r sum(dat$dead)` players who were included in the data used in @Popkin2023 who were deceased as of May 7, 2023.  The analysis presented here will utilize all hockey players in the data used in, both alive and deceased, in a survival analysis to explore differences in survival times between enforcers an non-enforcers, which we believe to be a more appropriate statistical method for this setting.  
+
+
+## Additional Data
+While @Popkin2023 only looks at a total of 45 deceased players  (21 enforcers and 24 controls), we identified `r sum(dat$dead)` players who were included in the data used in @Popkin2023 who were deceased as of May 7, 2023 based on data from hockey-reference.com.  
+
+## Data summaries
+Of the 6035 players included in this analysis, the average age was around 48 years old.  The average height and weight for these players was about 73 inches and 197 pounds, respectively.  A full summary of the overall data can be seen in table \ref{tab:EDAoverall}.  
+
+Of the players included in the analysis, on average, enforcers in this data set tended to be older than the non-enforcers (EF: `r summ$mnage[summ$EF]` vs non-EF: `r summ$mnage[!summ$EF]` and EP: `r summEP$mnage[summEP$EP]` vs non-EP: `r summEP$mnage[!summEP$EP]`).  Additionally, as seen in Tables \ref{tab:EDAEF} and \ref{tab:EDAEP} enforcers tended to also be taller and heavier on average than non-enforcers. The means of age, weight, height and goals are all significantly different between the enforcers and non-enforcer groups for both definitions of enforcers.  
 
 \begin{table}
 \begin{center}
@@ -312,7 +321,7 @@ While @Popkin2023 only looks at a total of 45 deceased players  (21 enforcers an
 \caption{Comparing enforcers to non enforcers when enforcer is defined as E-F \label{tab:EDAEP}}
 \end{table}
 
-After removing 4 players who were missing heights, there were `r nrow(dat)` players included in our analysis.  Of these players, on average, enforcers in this data set tended to be older than the non-enforcers (EF: `r summ$mnage[summ$EF]` vs non-EF: `r summ$mnage[!summ$EF]` and EP: `r summEP$mnage[summEP$EP]` vs non-EP: `r summEP$mnage[!summEP$EP]`).  Additionally, as seen in Tables \ref{tab:EDAEF} and \ref{tab:EDAEP} enforcers tended to also be taller and heavier on average than non-enforcers. The means of age, weight, height and goals are all significantly different between the enforcers and non-enforcer groups for both defintions of enforcers.  
+
 
 
 
@@ -355,10 +364,15 @@ survfit2(Surv ~ EPchar, data = dat) %>%
   add_confidence_interval()
 ```
 
-Figures \ref{fig:KMEF} and \ref{fig:KMEP} show Kaplan-Meier plots for EF and EP.  Whiel there is a substantial amount of overlap between the K-M curves between the enforcer and non-enforcers groups when enforcers is defined using the EF criteria, the enforcer group when defined by the EP criteria shows lower survival probabilities starting around age 50 relative to the non-enforcer group.  Though it is important to remember that these two groups differ substantially in age, height, and weight.
+
 
 # Methods {#sec:methods}
-Rather than focusing on mortality rates, as in @popkin2023, instead the focus here is to perform a re-analysis of the original study using survival analysis techniques, specifically Cox proportional hazards models, to look for differences in survival times of enforcers versus non-enforcers.  [[Why do we think survival analysis is the correct choice for analyzing this data.  Explain.  ]]
+The analysis presented here utilizes all hockey players in the data, both alive and deceased, in a survival analysis to explore differences in survival times between enforcers an non-enforcers, which we believe to be a more appropriate statistical method for this setting.  Rather than focusing on mortality rates, as in @popkin2023, we instead focus on survival times and leverage survival analysis techniques, specifically Cox proportional hazards models, to look for differences in survival times of enforcers versus non-enforcers. 
+
+ [[Why do we think survival analysis is the correct choice for analyzing this data.  Explain.  ]]
+ See example 2 here for the problem with mortality rate: https://www.mcw.edu/-/media/MCW/Departments/Biostatistics/vo18no5online.pdf
+
+Figures \ref{fig:KMEF} and \ref{fig:KMEP} show Kaplan-Meier plots for EF and EP.  While there is a substantial amount of overlap between the K-M curves between the enforcer and non-enforcers groups when enforcers is defined using the EF criteria, the enforcer group when defined by the EP criteria shows lower survival probabilities starting around age 50 relative to the non-enforcer group.  Though it is important to remember that these two groups differ substantially in age, height, and weight.
 
 
 
