@@ -335,7 +335,8 @@ newdataEP <-
                        Ht = rep(mean(Ht), 2),
                        Wt = rep(mean(Wt), 2),
                        DOB.Year = rep(mean(DOB.Year), 2),
-                       I_forward = rep(1, 2))
+                       I_forward = rep(1, 2), 
+                       Pos2 = "D")
                        )
 plot(survfit(coxphmod_EP, newdata = newdataEP), conf.int = TRUE, lty = c(1,2))
 
