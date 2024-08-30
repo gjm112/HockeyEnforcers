@@ -367,26 +367,125 @@ survfit2(Surv ~ EPchar, data = dat) %>%
 
 
 # Methods {#sec:methods}
-The analysis presented here utilizes all hockey players in the data, both alive and deceased, in a survival analysis to explore differences in survival times between enforcers an non-enforcers, which we believe to be a more appropriate statistical method for this setting.  Rather than focusing on mortality rates, as in @popkin2023, we instead focus on survival times and leverage survival analysis techniques, specifically Cox proportional hazards models, to look for differences in survival times of enforcers versus non-enforcers. 
+The analysis presented here utilizes all hockey players in the data, both alive and deceased, in a survival analysis to explore differences in survival times between enforcers an non-enforcers, which we believe to be a more appropriate method for analyizing the problem in this setting.  Rather than focusing on mortality rates, as in @popkin2023, we instead focus on survival times and leverage survival analysis techniques, specifically Cox proportional hazards models, to look for differences in survival times of enforcers versus non-enforcers. 
 
- [[Why do we think survival analysis is the correct choice for analyzing this data.  Explain.  ]]
- See example 2 here for the problem with mortality rate: https://www.mcw.edu/-/media/MCW/Departments/Biostatistics/vo18no5online.pdf
+ <!-- [[Why do we think survival analysis is the correct choice for analyzing this data.  Explain.  ]] -->
+ <!-- See example 2 here for the problem with mortality rate: https://www.mcw.edu/-/media/MCW/Departments/Biostatistics/vo18no5online.pdf -->
 
-Figures \ref{fig:KMEF} and \ref{fig:KMEP} show Kaplan-Meier plots for EF and EP.  While there is a substantial amount of overlap between the K-M curves between the enforcer and non-enforcers groups when enforcers is defined using the EF criteria, the enforcer group when defined by the EP criteria shows lower survival probabilities starting around age 50 relative to the non-enforcer group.  Though it is important to remember that these two groups differ substantially in age, height, and weight.
+Figures \ref{fig:KMEF} and \ref{fig:KMEP} show Kaplan-Meier plots for EF and EP.  There is substantial overlap in the K-M curves between the enforcer and non-enforcers groups when enforcers is defined using the EF criteria. However, the enforcer group when defined by the EP criteria exhibits evidence of lower survival probabilities starting around age 50 relative to the non-enforcer group, though it is important to remember that these two groups differ substantially in age, height, and weight.
 
+In order to account for these differences betwen the groups, Cox proportional hazards models @CoxPH were fit: one for each definition of enforcer defined in @Popkin2023 (i.e. E-F and E-P) with time until death as the outcome variable.  In addition, to indicators for each definition of enforcer, games played (GP), height (Ht), weight (Wt), year of birth (DOB), and position indicators (Center (C), Wing (W), or Defender (D)) were added to each model as control variables.  
 
+All analysis was performed in R version 4.4.0 @R using the survival library @survival-book.  
 
 <!-- Greg doesn't think this conditioning on death is valid!  The point of matching is to balance the groups in regards to confounders.  However, after matching, you can't just look at a subset and compare between then two groups because you could end up with unbalanced sets!  And indeed we do see this!  For example, the weight in the dead enforcers group is on average higher than the weight of the dead non-enforcers group.   -->
 
+```{r eval = FALSE, echo = FALSE}
+#Coxph code for EF
+coxphmod_EF <- coxph(Surv ~ EF + GP.x + Ht + Wt + DOB.Year + Pos2 , data = dat)
+summary(coxphmod_EF)
+library(xtable)
+xtable(summary(coxphmod_EF)$coef[,-4], digits = 5)
+cox.zph(coxphmod_EF)
 
+
+newdataEF <-
+  with(dat, data.frame(EF = c(TRUE, FALSE), 
+                       GP.x = rep(mean(GP.x), 2),
+                       Ht = rep(mean(Ht), 2),
+                       Wt = rep(mean(Wt), 2),
+                       DOB.Year = rep(mean(DOB.Year), 2),
+                       I_forward = rep(1, 2))
+                       )
+plot(survfit(coxphmod_EF, newdata = newdataEF), conf.int = TRUE, lty = c(1,2))
+
+
+nnn <- nrow(survfit(coxphmod_EF, newdata = newdataEF)$surv)
+ggdat <- data.frame(enforcer = c(rep("Enforcer",nnn),rep("Non-Enforcer",nnn)),
+  surv = c(
+  survfit(coxphmod_EF, newdata = newdataEF)$surv[, 1],
+  survfit(coxphmod_EF, newdata = newdataEF)$surv[, 2]
+),
+  lower = c(
+  survfit(coxphmod_EF, newdata = newdataEF)$lower[, 1],
+  survfit(coxphmod_EF, newdata = newdataEF)$lower[, 2]
+),
+  upper = c(
+  survfit(coxphmod_EF, newdata = newdataEF)$upper[, 1],
+  survfit(coxphmod_EF, newdata = newdataEF)$upper[, 2]
+),
+time = rep(survfit(coxphmod_EF, newdata = newdataEF)$time,2)
+)
+ggplot(aes(x = time,y = surv, color = enforcer), data = ggdat) + geom_path() + geom_path(aes(x = time,y = lower, color = enforcer), lty = 3) + geom_path(aes(x = time,y = upper, color = enforcer), lty = 3) 
+
+#Diagnostics plots for linearity
+dat$residuals_EF <- coxphmod_EF$residuals
+ggplot(aes(x = GP.x, y = residuals_EF), data = dat) + geom_point() + geom_smooth(color = "red")
+ggplot(aes(x = Ht, y = residuals_EF), data = dat) + geom_point() + geom_smooth(color = "red")
+ggplot(aes(x = Wt, y = residuals_EF), data = dat) + geom_point() + geom_smooth(color = "red")
+ggplot(aes(x = DOB.Year, y = residuals_EF), data = dat) + geom_point() + geom_smooth(color = "red")
+
+
+```
+
+```{r eval = FALSE, echo = FALSE}
+#Coxph code for EP
+cor(dat[,c("PIM.GP_numeric","Ht","Wt","DOB.Year")])
+
+coxphmod_EP <- coxph(Surv ~ EP + GP.x + Ht + Wt + DOB.Year + Pos2 , data = dat)
+summary(coxphmod_EP)
+library(xtable)
+xtable(summary(coxphmod_EP)$coef[,-4],digits = 5)
+cox.zph(coxphmod_EP)
+
+
+newdataEP <-
+  with(dat, data.frame(EP = c(TRUE, FALSE), 
+                       GP.x = rep(mean(GP.x), 2),
+                       Ht = rep(mean(Ht), 2),
+                       Wt = rep(mean(Wt), 2),
+                       DOB.Year = rep(mean(DOB.Year), 2),
+                       I_forward = rep(1, 2))
+                       )
+plot(survfit(coxphmod_EP, newdata = newdataEP), conf.int = TRUE, lty = c(1,2))
+
+
+nnn <- nrow(survfit(coxphmod_EP, newdata = newdataEP)$surv)
+ggdat <- data.frame(enforcer = c(rep("Enforcer",nnn),rep("Non-Enforcer",nnn)),
+  surv = c(
+  survfit(coxphmod_EP, newdata = newdataEP)$surv[, 1],
+  survfit(coxphmod_EP, newdata = newdataEP)$surv[, 2]
+),
+  lower = c(
+  survfit(coxphmod_EP, newdata = newdataEP)$lower[, 1],
+  survfit(coxphmod_EP, newdata = newdataEP)$lower[, 2]
+),
+  upper = c(
+  survfit(coxphmod_EP, newdata = newdataEP)$upper[, 1],
+  survfit(coxphmod_EP, newdata = newdataEP)$upper[, 2]
+),
+time = rep(survfit(coxphmod_EP, newdata = newdataEP)$time,2)
+)
+ggplot(aes(x = time,y = surv, color = enforcer), data = ggdat) + geom_path() + geom_path(aes(x = time,y = lower, color = enforcer), lty = 3) + geom_path(aes(x = time,y = upper, color = enforcer), lty = 3) 
+
+
+
+#Diagnostics plots for linearity
+dat$residuals_EP <- coxphmod_EP$residuals
+ggplot(aes(x = GP.x, y = residuals_EP), data = dat) + geom_point() + geom_smooth(color = "red")
+ggplot(aes(x = Ht, y = residuals_EP), data = dat) + geom_point() + geom_smooth(color = "red")
+ggplot(aes(x = Wt, y = residuals_EP), data = dat) + geom_point() + geom_smooth(color = "red")
+ggplot(aes(x = DOB.Year, y = residuals_EP), data = dat) + geom_point() + geom_smooth(color = "red")
+
+a <- coxph(Surv ~ PIM.GP_numeric  + GP.x + Ht + Wt + DOB.Year + Pos , data = dat)
+summary(a)
+library(xtable)
+xtable(summary(a)$coef)
+```
 
 
 # Results {#sec:results}
-Two Cox proportional hazards models @CoxPH were fit: one for each definition of enforcer defined in @Popkin2023 (i.e. E-F and E-P) with time until death as the response variable.  In addition, to indicators for each definition of enforcer, games played (GP), height (Ht), weight (Wt), year of birth (DOB), and position (Center (C), Wing (W), or Defender(D)) were added to each model as control variables. 
-
-Table \ref{tab:EF} shows the results for the Cox model when enforcers were defined based on their number of career fights.  No statistically significant difference was observed in the hazard functions of enforcers versus non enforcers (p-value = 0.54856).  
-
-However, a significant difference is observed in between enforcers and non-enforcers when the enforcers is defined based on their number of penalty minutes per game (p-value = 0.00169).  The estimated effect for E-P is 0.83023.  When exponentiated, this value is 2.29385, indicating approximately a 129\% increase in the hazard for enforcers vs non-enforcers when all other variables are held constant.  Fixing the levels of the continuous predictors at their mean values and fixing position to be defender, the estimated survival rate at the age of 50 for enforcers is 96.57\% (95\% CI: 94.63\%, 98.56\%) vs 98.49\% (95\% CI: 97.98\%, 99.00\%).  For the same conditions at the age of 75, the estimated survival rate for enforcers is about 74.4\% (95\% CI: 61.4\%, 90.32\%) compared to non-enforcers estimate survival rate of 87.95\% (95\% CI: 83.09\%, 93.10\%).  
+Table \ref{tab:EF} shows the results for the Cox proportional hazards model when enforcers were defined based on their number of career fights.  No statistically significant difference was observed in the hazard functions of enforcers versus non enforcers (p-value = 0.549). However, a significant difference is observed between enforcers and non-enforcers when the enforcer is defined based on their number of penalty minutes per game (p-value = 0.00169).  The estimated hazard ratio for E-P is 2.29, indicating a 129\% increase in the hazard for enforcers vs non-enforcers when all other variables are held constant.  Fixing the levels of the continuous predictors at their mean values and fixing position to be defender, the estimated survival rate at the age of 50 for enforcers vs non-enforcers is 96.57\% (95\% CI: 94.63\%, 98.56\%) vs 98.49\% (95\% CI: 97.98\%, 99.00\%).  For the same conditions at the age of 75, the estimated survival rate for enforcers is about 74.4\% (95\% CI: 61.4\%, 90.32\%) compared to non-enforcers estimate survival rate of 87.95\% (95\% CI: 83.09\%, 93.10\%).  
 
 <!-- ind surv lower upper time -->
 <!-- Non-Enforcer 0.9849056 0.9798140 0.9900238 50.00000 -->
@@ -479,6 +578,8 @@ time = rep(survfit(coxphmod_EP, newdata = newdataEP)$time,2)
 )
 ggplot(aes(x = time,y = surv, color = enforcer), data = ggdat) + geom_path() + geom_path(aes(x = time,y = lower, color = enforcer), lty = 3) + geom_path(aes(x = time,y = upper, color = enforcer), lty = 3) 
 
+#Survival rates are age 50. 
+#ggdat %>% filter(time == 50)
 
 ```
 
