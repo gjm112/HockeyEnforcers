@@ -46,10 +46,10 @@ theme_set(theme_minimal())
 ```{r echo = FALSE}
 #Reading in the raw data from the paper.  
 library(tidyverse)
-gen_JAMA <- read.csv("/Users/gregorymatthews/Dropbox/HockeyEnforcersGit/JAMA NHL Data/General-Table 1.csv")
-death_JAMA <- read.csv("/Users/gregorymatthews/Dropbox/HockeyEnforcersGit/JAMA NHL Data/Deaths-Table 1.csv")
+gen_JAMA <- read.csv("../JAMA NHL Data/General-Table 1.csv")
+death_JAMA <- read.csv("../JAMA NHL Data/Deaths-Table 1.csv")
 
-dead <- read.csv("/Users/gregorymatthews/Dropbox/HockeyEnforcersGit/deaths.csv")
+dead <- read.csv("../deaths.csv")
 #Filtering for players who started in or after 1967.  
 dead <- dead %>% filter(From >= 1967 & Name != "Name")
 
@@ -485,7 +485,11 @@ xtable(summary(a)$coef)
 
 
 # Results {#sec:results}
-Table \ref{tab:EF} shows the results for the Cox proportional hazards model when enforcers were defined based on their number of career fights.  No statistically significant difference was observed in the hazard functions of enforcers versus non enforcers (p-value = 0.549). However, a significant difference is observed between enforcers and non-enforcers when the enforcer is defined based on their number of penalty minutes per game (p-value = 0.00169).  The estimated hazard ratio for E-P is 2.29, indicating a 129\% increase in the hazard for enforcers vs non-enforcers when all other variables are held constant.  Fixing the levels of the continuous predictors at their mean values and fixing position to be defender, the estimated survival rate at the age of 50 for enforcers vs non-enforcers is 96.57\% (95\% CI: 94.63\%, 98.56\%) vs 98.49\% (95\% CI: 97.98\%, 99.00\%).  For the same conditions at the age of 75, the estimated survival rate for enforcers is about 74.4\% (95\% CI: 61.4\%, 90.32\%) compared to non-enforcers estimate survival rate of 87.95\% (95\% CI: 83.09\%, 93.10\%).  
+Table \ref{tab:EF} shows the results for the Cox proportional hazards model when enforcers were defined based on their number of career fights.  No statistically significant difference was observed in the hazard functions of enforcers versus non enforcers (p-value = 0.549). However, a significant difference is observed between enforcers and non-enforcers when the enforcer is defined based on their number of penalty minutes per game (p-value = 0.00169).  The estimated hazard ratio for E-P is 2.29, indicating a 129\% increase in the hazard for enforcers vs non-enforcers when all other variables are held constant.  
+
+Figure \@ref(fig:estsurv) shoes the estimated survival curves for enforcers versus non-enforcers (E-P) for defenders with all continuous variables held constant at mean levels.  Using this, the estimated survival rate at the age of 50 for enforcers vs non-enforcers is 96.57\% (95\% CI: 94.63\%, 98.56\%) vs 98.49\% (95\% CI: 97.98\%, 99.00\%).  For the same conditions at the age of 75, the estimated survival rate for enforcers is about 74.4\% (95\% CI: 61.4\%, 90.32\%) compared to non-enforcers estimate survival rate of 87.95\% (95\% CI: 83.09\%, 93.10\%).  
+
+
 
 <!-- ind surv lower upper time -->
 <!-- Non-Enforcer 0.9849056 0.9798140 0.9900238 50.00000 -->
@@ -539,7 +543,7 @@ E-P TRUE & 0.83023 & 2.29385 & 0.26443 & 0.00169 \\
 \caption{E-P \label{tab:EP}}
 \end{table}
 
-Figure \@ref(fig:estsurv)
+
 
 ```{r fig:estsurv, echo = FALSE, fig.cap = "Estimated Survival curve for EP for defenders.  All other variables are fixed at their mean level (GP = 285.8, Ht = 72.7in, Wt = 197.03, and Year of birth 1974.5."}
 coxphmod_EP <- coxph(Surv ~ EP + GP.x + Ht + Wt + DOB.Year + Pos2, data = dat)
