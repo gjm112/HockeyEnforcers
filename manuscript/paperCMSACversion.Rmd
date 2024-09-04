@@ -1,6 +1,6 @@
 ---
 title: |
-  |  \large Enforcers are fine, probably.  
+  |  \large Enforcers are not okay, probably.  
 author: | 
 abstract: |
  | A recent study looked at the relationship between long-term mortality and being an enforcer in the National Hockey League between 1967 and 2022.  They performed a matched cohort study that found no significant difference in the mortality rates of enforcers versus non-enforcers (where “enforcer” is defined based on number of career fights or average career penalty minutes).  They then perform an additional sub-analysis conditioning on players that were currently deceased and looking at just this subset of players, they find a significant difference in the mean age at death between the enforcers and non-enforcers groups (45.2 vs 55.2; p-value= 0.02) thus reaching the conclusion that enforcers died an average of 10 years earlier than non-enforcers. However, some of the statistical methods used to reach their conclusions were unconvincing, specifically the approach used to reach this last claim.  Therefore, we undertook a re-analysis of their study using a survival analysis approach, which we believe is the natural method to use to study this question.  In addition, we augmented their data by scraping hockey-reference to find more instances of players who were deceased.  Then, using a Cox proportional hazards model, we found no significant difference in survival rate between enforcers and non-enforcers when an enforcer was defined based on the number of career fights.  However, when an enforcer was defined by average career penalty minutes, a significant difference was observed, which was notably not found in the original article.  Specifically, we find an estimated hazard ratio of enforcers to non-enforcers of 2.29 (p-value: 0.00169).  Therefore, we agree with the sentiment of the original paper that there is some difference between survival of these two groups, but we believe our approach to estimating this effect is more appropriate and that the magnitude of the effect in the original article is overstated.
@@ -221,10 +221,10 @@ Recently, @Popkin2023 explored the effects of being an enforcer on mortality rat
 
 Based on their analysis (a matched cohort study) they find that there is no statistically significant difference in the mortality rates between enforcers and controls for either definition of enforcer, but they do conclude that enforcers died on average about 10 years earlier than their non-enforcer counterparts. In addition, they draw the conclusion that there is not a significant difference in all-cause mortality rate but find enforcers died more frequently of drug overdose and suicide. 
 
-
 <!-- Most notably, the method used to reached their most sensational finding - enforcers died on average about 10 years earlier than their non-enforcer counterparts - is statistically unsuitable. Specifically, to reach this conclusion, they use the data from the matched cohort study but then condition on death.  This effectively breaks the matching that they appropriately used to compare mortality rates, and therefore this conclusion is not statistically valid.   -->
 
 However, we believe that some of the statistical methods used in @Popkin2023 to reach these conclusions are not the best choices given the problem that is studied.  Here, we attempt not to replicate the results of the analysis in @Popkin2023, but what we believe to be more appropriate statistical methods, specifically survival analysis techniques. This shift in perspective allows us to overcome the weakness of mortality rate, which is that it is a function of when it is calculated (i.e. In all cases, mortality rate will be 100% when all members of the original sample have died). Instead, survival analysis provides a survival curve, which can be used to analyze how the probability of survival changes over time.  In addition, we augmented the data used in @Popkin2023 to increase the sample size in the analysis and include more deceased players in the data set. 
+
 
 As mentioned earlier, the outcome of this study is relevant to the debates about regulations and discourse around head trauma in hockey. An accurate analysis is imperative to prevent the spread of misinformed conclusions. ... talk about our conclusions
 
@@ -254,15 +254,17 @@ As mentioned earlier, the outcome of this study is relevant to the debates about
 <!-- colburn: https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1533-8525.1986.tb00249.x -->
 
 # Data 
+
 ## Data from original paper
 We obtained the two data sets used in @Popkin2023: general table (n = 7,432) and death table (n = 45).  As in @Popkin2023, we considered only players who's first season was 1967 or later and played any games between the 1967-68 and the 2021-22 NHL seasons.  This leaves 6,039 players after filtering (the exact number mentioned in @Popkin2023).  We then removed 4 players with missing height, leaving us with `r nrow(dat)` (6,035) remaining observations, of which 252 are deaths, for our re-analysis. 
+
 
 For direct comparison to @Popkin2023, we defined enforcers using the same two definitions that they used: 
  1. Enforcers-Fights (E-F): Any player with at least 50 career fights (n = 331)
  2. Enforcers-Penalty Minutes (E-P): Any player who averaged at least 3 penalty minutes per game (n = 183)
- 
-We note than in @Popkin2023, they find 183 E-P enforcers; we have only 182 in our data set with the discrepancy due the the removal of the 4 players with missing height information.  
 
+
+We note than in @Popkin2023, they find 183 E-P enforcers; we have only 182 in our data set with the discrepancy due the the removal of the 4 players with missing height information.  
 
 ## Additional Data
 While @Popkin2023 only looks at a total of 45 deceased players  (21 enforcers and 24 controls), we identified `r sum(dat$dead)` players who were included in the data used in @Popkin2023 who were deceased as of May 7, 2023 based on data from hockey-reference.com.  
@@ -283,6 +285,7 @@ In this same set of players, on average, enforcers in this data set tended to be
 
 <!-- Goals  & `r summ$mngoals[summ$EF]` (`r summ$segoals[summ$EF]`) & `r summ$mngoals[!summ$EF]` (`r summ$segoals[!summ$EF]`) & `r ifelse(round(t.test(dat$G~dat$EF)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$G~dat$EF)$p.value,2))`\\ -->
 
+
 \begin{table}
 \begin{center}
 \begin{tabular}{|c|c|}
@@ -300,18 +303,11 @@ In this same set of players, on average, enforcers in this data set tended to be
  \hline
 \end{tabular}
 \end{center}
-\caption{Overall summary stats \label{tab:EDAoverall}}
+\caption{Overall summary stats
+\label{tab:EDAoverall}}
 \end{table}
 
 
-
-
-<!-- The same definitions of enforceres presented in @Popkin2023 are used this current manuscript for comparison purposes.   -->
-
-<!-- (Note: In our analysis I only have 182 players who are defined as EP) -->
-
-
-<!-- add a table here with summary statistics comparing the groups EF and EP.-->
 
 
 \begin{table}
@@ -354,7 +350,7 @@ In this same set of players, on average, enforcers in this data set tended to be
 \end{tabular}
 \end{center}
 
-\caption{Comparing enforcers to non enforcers when enforcer is defined as E-F \label{tab:EDAEP}}
+\caption{Comparing enforcers to non enforcers when enforcer is defined as E-P \label{tab:EDAEP}}
 \end{table}
 
 
