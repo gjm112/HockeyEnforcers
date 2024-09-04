@@ -142,6 +142,7 @@ dat$Ctry2 <- as.factor(as.character(dat$Ctry2))
 #At least 50, not greater than 50.
 dat$EF <- dat$Total.Fights>=50
 
+#dat <- dat[!duplicated(dat$Player),] #6005 obs left
 
 #Cleaning penalty minutes
 pm_temp <- data.frame(do.call(rbind,strsplit(dat$PIM.GP,":")))
@@ -547,20 +548,20 @@ Figure \@ref{fig:estsurv} shoes the estimated survival curves for enforcers vers
 
 
 <!-- % latex table generated in R 4.2.2 by xtable 1.8-4 package -->
-<!-- % Mon Feb 26 09:06:03 2024 -->
+<!-- % Sep 4  2024 -->
 \begin{table}[ht]
 \centering
 \begin{tabular}{rrrrr}
   \hline
  & $\beta$ & $e^{\beta}$ & s.e. & p-value \\ 
   \hline
-E-F TRUE & 0.17328 & 1.18920 & 0.28884 & 0.54856 \\ 
-  GP & -0.00059 & 0.99941 & 0.00022 & 0.00815 \\ 
-  Ht & -0.04484 & 0.95615 & 0.04430 & 0.31144 \\ 
-  Wt & 0.02274 & 1.02300 & 0.00652 & 0.00049 \\ 
-  DOB & -0.01766 & 0.98250 & 0.00821 & 0.03140 \\ 
-  $I_D$ & -0.36479 & 0.69434 & 0.17428 & 0.03633 \\ 
-  $I_W$ & -0.25905 & 0.77178 & 0.15869 & 0.10258 \\ 
+  EFTRUE & 0.19994 & 1.22132 & 0.28948 & 0.48977 \\ 
+  GP.x & -0.00061 & 0.99939 & 0.00023 & 0.00675 \\ 
+  Ht & -0.03414 & 0.96644 & 0.04465 & 0.44455 \\ 
+  Wt & 0.02134 & 1.02157 & 0.00658 & 0.00118 \\ 
+  DOB.Year & -0.01691 & 0.98323 & 0.00825 & 0.04047 \\ 
+  Pos2D & -0.38403 & 0.68111 & 0.17532 & 0.02849 \\ 
+  Pos2W & -0.28394 & 0.75281 & 0.15967 & 0.07536 \\ 
    \hline
 \end{tabular}
 \caption{E-F \label{tab:EF}}
@@ -577,13 +578,13 @@ E-F TRUE & 0.17328 & 1.18920 & 0.28884 & 0.54856 \\
   \hline
  & $\beta$ & $e^{\beta}$ & s.e. & p-value \\ 
   \hline
-E-P TRUE & 0.83023 & 2.29385 & 0.26443 & 0.00169 \\ 
-  GP & -0.00051 & 0.99949 & 0.00021 & 0.01759 \\ 
-  Ht & -0.03859 & 0.96215 & 0.04406 & 0.38111 \\ 
-  Wt & 0.02001 & 1.02022 & 0.00654 & 0.00221 \\ 
-  DOB & -0.01778 & 0.98238 & 0.00827 & 0.03150 \\ 
-  $I_D$ & -0.36900 & 0.69142 & 0.17444 & 0.03440 \\ 
-  $I_W$ & -0.28804 & 0.74973 & 0.15946 & 0.07087 \\ 
+EPTRUE & 0.85436 & 2.34988 & 0.26474 & 0.00125 \\ 
+  GP.x & -0.00052 & 0.99948 & 0.00022 & 0.01587 \\ 
+  Ht & -0.02783 & 0.97255 & 0.04439 & 0.53069 \\ 
+  Wt & 0.01859 & 1.01877 & 0.00659 & 0.00480 \\ 
+  DOB.Year & -0.01699 & 0.98316 & 0.00831 & 0.04102 \\ 
+  $I_D$ & -0.38847 & 0.67810 & 0.17549 & 0.02686 \\ 
+  $I_W$ & -0.31332 & 0.73102 & 0.16048 & 0.05089 \\ 
    \hline
    \hline
 \end{tabular}
@@ -639,6 +640,10 @@ Talk about the conditioning on death stuff.
 Age difference statement in Popkin is over stated.  
 
 # Conclusion {#sec:conclusion}
+@Popkin2023 presented work looking for differences in mortality rates between NHL enforcers and non-enforcers who played between 1967 and 2022 where they defined enforcers in two ways: one based on the number of career fights and the other based on the average career penalty minutes per game.  They performed a matched-cohort study matching on date of birth, total number of games played, height, weight, and position.  They conclude there there is no statistically significant difference in the mortality rates for either definition of enforcer.  They then go on to perform an additional analytics where they condition on death and show that of players in their matched data set who are deceased, enforcers, using either definition, died an average of about 10 years earlier than their non-enforcer counterparts.  
+
+
+ <!-- including date of birth, total number of games played, height, weight, and position played. -->
 
 
 Unobserved Confounders: 
