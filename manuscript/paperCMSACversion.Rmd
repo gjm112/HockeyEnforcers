@@ -189,6 +189,12 @@ summEP <-
 
 ```   
 
+
+```{r}
+#Enforcer by race
+dat %>% mutate(northamerica = ifelse(Ctry %in% c("USA","CAN"),TRUE,FALSE)) %>% group_by(EP, northamerica) %>% summarize(n = n()) %>% pivot_wider(names_from = northamerica, values_from = n)
+```
+
 # Introduction {#sec:intro}
 
 Fighting in the National Hockey League (NHL) has been an integral part of the sport since the earliest days of the league. More than just a way to express frustration, players often use fighting strategically to the benefit of the team. One of these strategies includes instigating a fight when a player from the opposite team has violated an unwritten rule of the game, which historically has led to hockey teams carrying so-called "enforcers" on their rosters. An enforcer is a member of a hockey team who, along with being a regular player, is the one tasked with fighting these opposing players. While this is not an officially defined position, the nature of needing to be able to fight any opponent generally designates the biggest and strongest players as those most likely to be enforcers. 
@@ -243,7 +249,6 @@ For direct comparison to @Popkin2023, we defined enforcers using the same two de
  2. Enforcers-Penalty Minutes (E-P): Any player who averaged at least 3 penalty minutes per game (n = 183)
  
 We note than in @Popkin2023, they find 183 E-P enforcers; we have only 182 in our data set (check that this is because of the missing height issue.)
-
 
 
 ## Additional Data
