@@ -4,8 +4,9 @@ title: |
 author: | 
 abstract: |
  | A recent study looked at the relationship between long-term mortality and being an enforcer in the National Hockey League between 1967 and 2022.  They performed a matched cohort study that found no significant difference in the mortality rates of enforcers versus non-enforcers (where “enforcer” is defined based on number of career fights or average career penalty minutes).  They then perform an additional sub-analysis conditioning on players that were currently deceased and looking at just this subset of players, they find a significant difference in the mean age at death between the enforcers and non-enforcers groups (45.2 vs 55.2; p-value= 0.02) thus reaching the conclusion that enforcers died an average of 10 years earlier than non-enforcers. However, some of the statistical methods used to reach their conclusions were unconvincing, specifically the approach used to reach this last claim.  Therefore, we undertook a re-analysis of their study using a survival analysis approach, which we believe is the natural method to use to study this question.  In addition, we augmented their data by scraping hockey-reference to find more instances of players who were deceased.  Then, using a Cox proportional hazards model, we found no significant difference in survival rate between enforcers and non-enforcers when an enforcer was defined based on the number of career fights.  However, when an enforcer was defined by average career penalty minutes, a significant difference was observed, which was notably not found in the original article.  Specifically, we find an estimated hazard ratio of enforcers to non-enforcers of 2.29 (p-value: 0.00169).  Therefore, we agree with the sentiment of the original paper that there is some difference between survival of these two groups, but we believe our approach to estimating this effect is more appropriate and that the magnitude of the effect in the original article is overstated.
-  \vspace{2mm}
-  | Keywords: survival analysis, hockey
+ \vspace{2mm} 
+  |
+ Keywords: survival analysis, hockey
 bibliography: references.bib
 fontsize: 10pt
 link-citations: true
@@ -151,9 +152,15 @@ dat$EP <- dat$PIM.GP_numeric >=3
 #Removed 4 rows missing height
 dat <- dat %>% filter(!is.na(Ht))
 
+dat$Pos2 <- as.character(dat$Pos)
+dat$Pos2[dat$Pos2 %in% c("L","R")] <- "W"
+dat$Pos2 <- factor(dat$Pos2)
+
 summ <-
   dat %>% group_by(EF) %>% summarize(
     n = n(),
+    mnGP = round(mean(GP.x), 2),
+    seGP = round(sd(GP.x), 2),
     mnage = round(mean(age), 2),
     seage = round(sd(age) / sqrt(n),3),
     mnwt = round(mean(Wt), 2),
@@ -165,13 +172,18 @@ summ <-
     mntf = round(mean(Total.Fights), 2),
     setf = round(sd(Total.Fights) / sqrt(n),3),
     mnpimgp = round(mean(PIM.GP_numeric), 2),
-    sepimgp = round(sd(PIM.GP_numeric) / sqrt(n),3)
+    sepimgp = round(sd(PIM.GP_numeric) / sqrt(n),3),
+    pD = round(mean(Pos2 == "D"),3),
+    pW = round(mean(Pos2 == "W"),3),
+    pC = round(mean(Pos2 == "C"),3)
     
   )
 
 summEP <-
   dat %>% group_by(EP) %>% summarize(
     n = n(),
+    mnGP = round(mean(GP.x), 2),
+    seGP = round(sd(GP.x), 2),
     mnage = round(mean(age), 2),
     seage = round(sd(age) / sqrt(n),3),
     mnwt = round(mean(Wt), 2),
@@ -183,17 +195,17 @@ summEP <-
     mntf = round(mean(Total.Fights), 2),
     setf = round(sd(Total.Fights) / sqrt(n),3),
     mnpimgp = round(mean(PIM.GP_numeric), 2),
-    sepimgp = round(sd(PIM.GP_numeric) / sqrt(n),3)
+    sepimgp = round(sd(PIM.GP_numeric) / sqrt(n),3),
+    pD = round(mean(Pos2 == "D"),3),
+    pW = round(mean(Pos2 == "W"),3),
+    pC = round(mean(Pos2 == "C"),3)
   )
 
 
 ```   
 
 
-```{r}
-#Enforcer by race
-dat %>% mutate(northamerica = ifelse(Ctry %in% c("USA","CAN"),TRUE,FALSE)) %>% group_by(EP, northamerica) %>% summarize(n = n()) %>% pivot_wider(names_from = northamerica, values_from = n)
-```
+
 
 # Introduction {#sec:intro}
 
@@ -209,9 +221,10 @@ Recently, @Popkin2023 explored the effects of being an enforcer on mortality rat
 
 Based on their analysis (a matched cohort study) they find that there is no statistically significant difference in the mortality rates between enforcers and controls for either definition of enforcer, but they do conclude that enforcers died on average about 10 years earlier than their non-enforcer counterparts. In addition, they draw the conclusion that there is not a significant difference in all-cause mortality rate but find enforcers died more frequently of drug overdose and suicide. 
 
-However, we believe that some of the methods used in @Popkin2023 to reach these conclusions are not statistically appropriates.  Most notably, the method used to reached their most sensational finding - enforcers died on average about 10 years earlier than their non-enforcer counterparts - is statistically unsuitable. Specifically, to reach this conclusion, they use the data from the matched cohort study but then condition on death.  This effectively breaks the matching that they appropriately used to compare mortality rates, and therefore this conclusion is not statistically valid.  
 
-Here, we attempt not to replicate the results of the analysis in @Popkin2023, but what we believe to be more appropriate statistical analysis, specifically survival analysis methodology. This shift in perspective allows us to overcome the weakness of mortality rate, which is that it is a function of when it is calculated (i.e. In all cases, mortality rate will be 100% when all members of the original sample have died). Instead, survival analysis provides a survival curve, which can be used to analyze how the probability of survival changes over time.  In addition, we augmented the data used in @Popkin2023 to increase the sample size in the analysis and include more deceased players in the data set. 
+<!-- Most notably, the method used to reached their most sensational finding - enforcers died on average about 10 years earlier than their non-enforcer counterparts - is statistically unsuitable. Specifically, to reach this conclusion, they use the data from the matched cohort study but then condition on death.  This effectively breaks the matching that they appropriately used to compare mortality rates, and therefore this conclusion is not statistically valid.   -->
+
+However, we believe that some of the statistical methods used in @Popkin2023 to reach these conclusions are not the best choices given the problem that is studied.  Here, we attempt not to replicate the results of the analysis in @Popkin2023, but what we believe to be more appropriate statistical methods, specifically survival analysis techniques. This shift in perspective allows us to overcome the weakness of mortality rate, which is that it is a function of when it is calculated (i.e. In all cases, mortality rate will be 100% when all members of the original sample have died). Instead, survival analysis provides a survival curve, which can be used to analyze how the probability of survival changes over time.  In addition, we augmented the data used in @Popkin2023 to increase the sample size in the analysis and include more deceased players in the data set. 
 
 As mentioned earlier, the outcome of this study is relevant to the debates about regulations and discourse around head trauma in hockey. An accurate analysis is imperative to prevent the spread of misinformed conclusions. ... talk about our conclusions
 
@@ -230,7 +243,7 @@ As mentioned earlier, the outcome of this study is relevant to the debates about
 
 <!-- In the matched cohort study presented in @Popkin2023, enforcers were matched to non-enforcers on birth year, weight, height, etc.  After matching, mortality rates between the two groups were computed.  Neither definition of enforcers (i.e. E-F or E-P) yielded significant difference in the mortality rates between enforcers and non-enforcers.   -->
 
-<!-- <!-- (Greg comment: After matching you CAN compare mortality rates and that comparison would be valid AT THAT GIVEN POINT when they are compared.  But a better analysis would be to use survival analysis.  The problem with mortality rate is that eventually everyone in both groups will be dead if you wait long enough and that comparison is meaningless. Survival times are much better comparison. ) --> -->
+<!-- <!-- (Greg comment: After matching you CAN compare mortality rates and that comparison would be valid AT THAT GIVEN POINT when they are compared.  But a better analysis would be to use survival analysis.  The problem with mortality rate is that eventually everyone in both groups will be dead if you wait long enough and that comparison is meaningless. Survival times are much better comparison. ) --> 
 
 <!-- However, the authors of @Popkin2023 next conditioned on death yielding a sample size of n = 13 and n = 14 for the enforcer (defined by total fights) vs non-enforcer group, respectively, and show that the age at death is about 10 years less for the enforcers group relative to the non-enforcer group (p = 0.03).  This approach is not statistically valid, since once death is conditioned upon, the matching that is used to balance the two groups is broken and they can become imbalanced, which is what we believe the authors in @Popkin2023 observed.  -->
 
@@ -241,23 +254,34 @@ As mentioned earlier, the outcome of this study is relevant to the debates about
 <!-- colburn: https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1533-8525.1986.tb00249.x -->
 
 # Data 
-## Data from orignal paper
+## Data from original paper
 We obtained the two data sets used in @Popkin2023: general table (n = 7,432) and death table (n = 45).  As in @Popkin2023, we considered only players who's first season was 1967 or later and played any games between the 1967-68 and the 2021-22 NHL seasons.  This leaves 6,039 players after filtering (the exact number mentioned in @Popkin2023).  We then removed 4 players with missing height, leaving us with `r nrow(dat)` (6,035) remaining observations, of which 252 are deaths, for our re-analysis. 
 
 For direct comparison to @Popkin2023, we defined enforcers using the same two definitions that they used: 
  1. Enforcers-Fights (E-F): Any player with at least 50 career fights (n = 331)
  2. Enforcers-Penalty Minutes (E-P): Any player who averaged at least 3 penalty minutes per game (n = 183)
  
-We note than in @Popkin2023, they find 183 E-P enforcers; we have only 182 in our data set (check that this is because of the missing height issue.)
+We note than in @Popkin2023, they find 183 E-P enforcers; we have only 182 in our data set with the discrepancy due the the removal of the 4 players with missing height information.  
 
 
 ## Additional Data
 While @Popkin2023 only looks at a total of 45 deceased players  (21 enforcers and 24 controls), we identified `r sum(dat$dead)` players who were included in the data used in @Popkin2023 who were deceased as of May 7, 2023 based on data from hockey-reference.com.  
 
 ## Data summaries
-Of the 6035 players included in this analysis, the average age was around 48 years old.  The average height and weight for these players was about 73 inches and 197 pounds, respectively.  A full summary of the overall data can be seen in table \ref{tab:EDAoverall}.  
+Of the 6035 players included in this analysis, the average age was around 48 years old.  The average height and weight for these players was about 73 inches and 197 pounds, respectively.  A full summary of the overall data can be seen in table \ref{tab:EDAoverall}. 
 
-Of the players included in the analysis, on average, enforcers in this data set tended to be older than the non-enforcers (EF: `r summ$mnage[summ$EF]` vs non-EF: `r summ$mnage[!summ$EF]` and EP: `r summEP$mnage[summEP$EP]` vs non-EP: `r summEP$mnage[!summEP$EP]`).  Additionally, as seen in Tables \ref{tab:EDAEF} and \ref{tab:EDAEP} enforcers tended to also be taller and heavier on average than non-enforcers. The means of age, weight, height and goals are all significantly different between the enforcers and non-enforcer groups for both definitions of enforcers.  
+<!-- This is what they matched on " including date of birth, total number of games played, height, weight, and position played." -->
+
+In this same set of players, on average, enforcers in this data set tended to be older than the non-enforcers (EF: `r summ$mnage[summ$EF]` vs non-EF: `r summ$mnage[!summ$EF]` and EP: `r summEP$mnage[summEP$EP]` vs non-EP: `r summEP$mnage[!summEP$EP]`).  Additionally, as seen in Tables \ref{tab:EDAEF} and \ref{tab:EDAEP} enforcers tended to also be taller and heavier on average than non-enforcers. The means of age, weight, height and played are all significantly different between the enforcers and non-enforcer groups for both definitions of enforcers.  We also note differences some substantial differences in the positional distribution of enforcers vs non-enforcers.  Specifically, the percentage of defensive players in the enforcer vs non-enforcers is relatively close there are very few enforcers, defined with either E-F or E-P, who are listed as playing center.  This also means that the percentage of enforcers who are listed as wings (either right or left) is higher for enforcers than for non-enforcers.  The variables listed here are the same as those that were used for matching in @Popkin2023 (i.e. date of birth, total number of games played, height, weight and position).
+
+
+
+
+
+
+
+
+<!-- Goals  & `r summ$mngoals[summ$EF]` (`r summ$segoals[summ$EF]`) & `r summ$mngoals[!summ$EF]` (`r summ$segoals[!summ$EF]`) & `r ifelse(round(t.test(dat$G~dat$EF)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$G~dat$EF)$p.value,2))`\\ -->
 
 \begin{table}
 \begin{center}
@@ -267,6 +291,7 @@ Of the players included in the analysis, on average, enforcers in this data set 
  \hline
  n & `r nrow(dat)`    \\
  n deceased & `r sum(dat$dead)` (`r paste0(round(100*sum(dat$dead)/nrow(dat),2),"\\%")`)    \\
+ Games Played & `r  round(mean(dat$GP.x),2)` (`r round(sd(dat$GP.x),2)`)\\
  Age (Years) & `r round(mean(as.numeric(dat$age)),2)` (`r round(sd(as.numeric(dat$age)),2)`)\\
  Height (Inches) & `r round(mean(as.numeric(dat$Ht)),2)` (`r round(sd(as.numeric(dat$Ht)),2)`)\\
  Weight (Pounds) & `r mean(as.numeric(dat$Wt))` (`r sd(as.numeric(dat$Wt))`)\\
@@ -296,10 +321,14 @@ Of the players included in the analysis, on average, enforcers in this data set 
  Variable & EF = TRUE & EF = FALSE & p-value \\
  \hline
  n & `r summ$n[summ$EF]` & `r summ$n[!summ$EF]` & \\
+ Games Played & `r summ$mnGP[summ$EF]` (`r summ$seGP[summ$EF]`) & `r summ$mnGP[!summ$EF]` (`r summ$seGP[!summ$EF]`) & `r ifelse(round(t.test(dat$GP.x~dat$EF)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$GP.x~dat$EF)$p.value,2))`\\
  Age (years) & `r summ$mnage[summ$EF]` (`r summ$seage[summ$EF]`) & `r summ$mnage[!summ$EF]` (`r summ$seage[!summ$EF]`) & `r ifelse(round(t.test(dat$age~dat$EF)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$age~dat$EF)$p.value,2))`\\
  Weight (lbs) & `r summ$mnwt[summ$EF]` (`r summ$sewt[summ$EF]`) & `r summ$mnwt[!summ$EF]` (`r summ$sewt[!summ$EF]`) & `r ifelse(round(t.test(dat$Wt~dat$EF)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$age~dat$EF)$p.value,2))`\\
   Height (in) & `r summ$mnht[summ$EF]` (`r summ$seht[summ$EF]`) & `r summ$mnht[!summ$EF]` (`r summ$seht[!summ$EF]`) & `r ifelse(round(t.test(dat$Ht~dat$EF)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$Ht~dat$EF)$p.value,2))`\\
-    Goals  & `r summ$mngoals[summ$EF]` (`r summ$segoals[summ$EF]`) & `r summ$mngoals[!summ$EF]` (`r summ$segoals[!summ$EF]`) & `r ifelse(round(t.test(dat$G~dat$EF)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$G~dat$EF)$p.value,2))`\\
+          percent D & `r paste0(100*summ$pD[summ$EF],"\\%")` & `r paste0(100*summ$pD[!summ$EF],"\\%")` & \\
+    percent W & `r paste0(100*summ$pW[summ$EF],"\\%")` & `r paste0(100*summ$pW[!summ$EF],"\\%")` & \\
+    percent C & `r paste0(100*summ$pC[summ$EF],"\\%")` & `r paste0(100*summ$pC[!summ$EF],"\\%")` & \\
+    
  \hline
 \end{tabular}
 \end{center}
@@ -314,11 +343,13 @@ Of the players included in the analysis, on average, enforcers in this data set 
  Variable & EP = TRUE & EP = FALSE & p-value \\
  \hline
  n & `r summEP$n[summEP$EP]` & `r summEP$n[!summEP$EP]` & \\
-  GP & `r summEP$mnage[summEP$EP]` (`r summEP$seage[summEP$EP]`) & `r summEP$mnage[!summEP$EP]` (`r summEP$seage[!summEP$EP]`) & `r ifelse(round(t.test(dat$age~dat$EP)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$age~dat$EP)$p.value,2))`\\
+ Games Played & `r summEP$mnGP[summEP$EP]` (`r summEP$seGP[summEP$EP]`) & `r summEP$mnGP[!summEP$EP]` (`r summEP$seGP[!summEP$EP]`) & `r ifelse(round(t.test(dat$GP.x~dat$EP)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$GP.x~dat$EP)$p.value,2))`\\
  Age (years) & `r summEP$mnage[summEP$EP]` (`r summEP$seage[summEP$EP]`) & `r summEP$mnage[!summEP$EP]` (`r summEP$seage[!summEP$EP]`) & `r ifelse(round(t.test(dat$age~dat$EP)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$age~dat$EP)$p.value,2))`\\
  Weight (lbs) & `r summEP$mnwt[summEP$EP]` (`r summEP$sewt[summEP$EP]`) & `r summEP$mnwt[!summEP$EP]` (`r summEP$sewt[!summEP$EP]`) & `r ifelse(round(t.test(dat$Wt~dat$EP)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$age~dat$EP)$p.value,2))`\\
   Height (in) & `r summEP$mnht[summEP$EP]` (`r summEP$seht[summEP$EP]`) & `r summEP$mnht[!summEP$EP]` (`r summEP$seht[!summEP$EP]`) & `r ifelse(round(t.test(dat$Ht~dat$EP)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$Ht~dat$EP)$p.value,2))`\\
-      Goals  & `r summEP$mngoals[summEP$EP]` (`r summEP$segoals[summEP$EP]`) & `r summEP$mngoals[!summEP$EP]` (`r summEP$segoals[!summEP$EP]`) & `r ifelse(round(t.test(dat$G~dat$EP)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$G~dat$EP)$p.value,2))`\\
+    percent D & `r paste0(100*summEP$pD[summEP$EP],"\\%")` & `r paste0(100*summEP$pD[!summEP$EP],"\\%")` & \\
+    percent W & `r paste0(100*summEP$pW[summEP$EP],"\\%")` & `r paste0(100*summEP$pW[!summEP$EP],"\\%")` & \\
+    percent C & `r paste0(100*summEP$pC[summEP$EP],"\\%")` & `r paste0(100*summEP$pC[!summEP$EP],"\\%")` & \\
  \hline
 \end{tabular}
 \end{center}
@@ -369,10 +400,25 @@ survfit2(Surv ~ EPchar, data = dat) %>%
   add_confidence_interval()
 ```
 
+<!-- ```{r KMEP, echo = FALSE, fig.cap="Kaplan Meier plot for EP" } -->
+<!-- dat <- dat %>% mutate(northamerica = ifelse(Ctry %in% c("USA","CAN"),"North America","Other")) -->
+<!-- library(ggsurvfit) -->
+<!-- survfit2(Surv ~ northamerica, data = dat) %>%  -->
+<!--   ggsurvfit() + -->
+<!--   labs( -->
+<!--     x = "Age", -->
+<!--     y = "Overall survival probability" -->
+<!--   ) +  -->
+<!--   add_confidence_interval() -->
+<!-- ``` -->
+
+
+
+
 
 
 # Methods {#sec:methods}
-The analysis presented here utilizes all hockey players in the data, both alive and deceased, in a survival analysis to explore differences in survival times between enforcers an non-enforcers, which we believe to be a more appropriate method for analyizing the problem in this setting.  Rather than focusing on mortality rates, as in @popkin2023, we instead focus on survival times and leverage survival analysis techniques, specifically Cox proportional hazards models, to look for differences in survival times of enforcers versus non-enforcers. 
+The analysis presented here utilizes all hockey players in the data, both alive and deceased, in a survival analysis to explore differences in survival times between enforcers an non-enforcers, which we believe to be a more appropriate method for analyizing the problem in this setting.  Rather than focusing on mortality rates, as in @Popkin2023, we instead focus on survival times and leverage survival analysis techniques, specifically Cox proportional hazards models, to look for differences in survival times of enforcers versus non-enforcers. 
 
  <!-- [[Why do we think survival analysis is the correct choice for analyzing this data.  Explain.  ]] -->
  <!-- See example 2 here for the problem with mortality rate: https://www.mcw.edu/-/media/MCW/Departments/Biostatistics/vo18no5online.pdf -->
@@ -437,7 +483,7 @@ ggplot(aes(x = DOB.Year, y = residuals_EF), data = dat) + geom_point() + geom_sm
 #Coxph code for EP
 cor(dat[,c("PIM.GP_numeric","Ht","Wt","DOB.Year")])
 
-coxphmod_EP <- coxph(Surv ~ EP + GP.x + Ht + Wt + DOB.Year + Pos2 , data = dat)
+coxphmod_EP <- coxph(Surv ~  EP + GP.x + Ht + Wt + DOB.Year + Pos2 , data = dat)
 summary(coxphmod_EP)
 library(xtable)
 xtable(summary(coxphmod_EP)$coef[,-4],digits = 5)
@@ -597,6 +643,35 @@ Talk about the conditioning on death stuff.
 Age difference statement in Popkin is over stated.  
 
 # Conclusion {#sec:conclusion}
+
+
+Unobserved Confounders: 
+We further note several additional difference between the enforcers and the non-enforcer groups that were not considered in the @Popkin2023.  As an example, the number of average number of goals scores between the two groups significantly different for both definitions of enforcers.  The average number of goals scores for E-F enforcers  vs non-enforcers was `r summ$mngoals[summ$EF]` vs `r summ$mngoals[!summ$EF]` (p-value: `r ifelse(round(t.test(dat$G~dat$EF)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$G~dat$EF)$p.value,2))`).  For E-P enforcers, the average number of goals for enforcers was `r summEP$mngoals[summEP$EP]` vs `r summEP$mngoals[!summEP$EP]` (p-value: `r ifelse(round(t.test(dat$G~dat$EP)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$G~dat$EP)$p.value,2))`).  
+
+
+```{r echo = FALSE}
+#Enforcer by country
+epcountry <- dat %>% mutate(northamerica = ifelse(Ctry %in% c("USA","CAN"),"North America","Other")) %>% group_by(EP, northamerica) %>% summarize(n = n()) %>% pivot_wider(names_from = northamerica, values_from = n) %>% mutate(p = `North America`/(`North America`+ Other))
+
+#prop.test(epcountry$`North America`,epcountry$Other+epcountry$`North America`)
+
+
+#Enforcer by country
+efcountry <- dat %>% mutate(northamerica = ifelse(Ctry %in% c("USA","CAN"),"North America","Other")) %>% group_by(EF, northamerica) %>% summarize(n = n()) %>% pivot_wider(names_from = northamerica, values_from = n)  %>% mutate(p = `North America`/(`North America`+ Other))
+
+
+#prop.test(efcountry$`North America`,efcountry$Other+efcountry$`North America`)
+
+#How many players are in each group
+#table(dat$EP, dat$EF)
+
+```
+
+Perhaps more interestingly, we find highly significant differences in geographic region of enforcers vs non-enforcers for both definitions.  In the enforcer group `r paste0(100*round(efcountry$p[efcountry$EF],4),"\\%")` and `r paste0(100*round(epcountry$p[epcountry$EP],4),"\\%")` of those groups are from North America (i.e. United States or Canada) for E-F and E-P, respectively.  For non-enforcers, North American players make up only `r paste0(100*round(efcountry$p[!efcountry$EF],4),"\\%")` for E-F and `r paste0(100*round(epcountry$p[!epcountry$EP],4),"\\%")` for E-P.  For both definitions of enforcer, these differences are significant with p-values for both definitions less than 0.0001.   
+
+While we do not address this imbalance here, as we focus on closely following the work of @Popkin23, it is worth noting the substantial imbalance in geographic origin (i.e. North American vs outside of North America) of enforcers versus non-enforcer.
+
+
 
 # Acknowledgements {-}
 
