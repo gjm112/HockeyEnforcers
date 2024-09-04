@@ -55,7 +55,6 @@ dead <- dead %>% filter(From >= 1967 & Name != "Name")
 
 
 
-
 # Pelle Lindbergh -> that was his real name, no other spelling, not sure about this one
 dead$Name[dead$Name == 'Lars-Erik SjÃ¶berg'] <- 'Lars Sjoberg'
 dead$Name[dead$Name == 'BjÃ¸rn Skaare'] <- 'Bjorn Skaare'
@@ -191,13 +190,24 @@ summEP <-
 
 # Introduction {#sec:intro}
 
-Fighting in the National Hockey League (NHL) has been an integral part of the sport since the earliest days of the league. More than just a way to express frustration, players often use fighting strategically to the benefit of the team. One of these strategies includes instigating a fight when a player from the opposite team has violated an unwritten rule of the game, which historically has led to hockey teams carrying so-called "enforcers" on their rosters. An enforcer is a member of a hockey team who, along with being a regular player, is the one tasked with fighting these opposing players. While this is not an officially defined position, the nature of needing to be able to fight any opponent generally designates the biggest and strongest players as those most likely to be enforcers. 
+Fighting in the National Hockey League (NHL) has been an integral part of the sport since the earliest days of the league. More than just a way to express frustration, players often use fighting strategically to the benefit of the team. One of these strategies includes instigating a fight when a player from the opposite team has violated an unwritten rule of the game, which historically has led to hockey teams carrying so-called "enforcers" on their rosters. The enforcer is the teammember tasked with fighting these opposing players. While this is not an officially defined position, the nature of needing to be able to fight any opponent generally designates the biggest and strongest players as those most likely to be enforcers. 
 
 @Colburn1986 discusses the intentions behind these public fights. The crowd gets energized and entertained, but more importantly, the fight is a stage used to establish the social customs and expectations of players on the ice.  Specifically, they say, "insofar as the fist-fight is the locus of socially available beliefs concerning the moral character and integrity of players, ... the fist-fight represents a mode of informal social control among players".  
 
 @Silverwood2015 looked anecdotally at how enforcers fit into a team atmosphere noticed that teammates put their enforcers on a pedestal. Performing well as an enforcer leads to the player being seen as a protector. When an enforcer fulfills these additional responsibilities to being on the ice as a normal player, players say that it is common for that enforcer to receive perks, such as not paying for their own meals or getting the best seat on the bus. They go as far as to say these players are "deified", emphasizing the social aspects of hockey that surround this history of violence. 
 
-While any player on a hockey team can get into a fight, enforcers are exposed to many more fights than the typical NHL player. As a result of being exposed to additional contact, they are potentially exposed to additional head trauma beyond the amount associated with playing hockey. There are many questions about the long-term implications of this head trauma and its potential to result in negative health outcomes in the future. The ingrained nature of fighting into the game of hockey is greatly criticized and there are many active debates about its current declining trend (can we cite something that shows the trend is declining?). Should the game continue to move away from fighting in favor of younger, faster, highly-skilled players? Objectively, however, fighting has historically been a non-negligible part of the game and correctly understanding the implications this has on player health may help direct the future of the sport. 
+While any player on a hockey team can get into a fight, enforcers are exposed to many more fights than the typical NHL player. As a result of being exposed to additional contact, they are potentially exposed to additional head trauma beyond the amount associated with playing hockey. There are many questions about the long-term implications of this head trauma and its potential to result in negative health outcomes in the future. The ingrained nature of fighting into the game of hockey is greatly criticized and there are many active debates about its current declining trend. Figure \ref{fig:enforcer_density} shows a decline in the proportion of enforcers to non-enforcers as players get younger. The question is, should the game continue to move away from contact-driven strategy in favor of younger, faster, highly-skilled players?
+
+```{r enforcer_density, echo = FALSE, fig.cap='Density Plot of Study Cohorts by DOB'}
+cohort_dat = dat %>% mutate(cohort = case_when(PIM.GP > 3 ~ 'Enforcer',
+                                  Total.Fights > 50 ~ 'Enforcer',
+                                  .default = 'Non-Enforcer')) 
+
+cohort_dat$cohort = as.factor(cohort_dat$cohort)
+
+ggplot(cohort_dat, aes(x = DOB)) + geom_density(aes(fill = cohort),alpha = 0.75 )
+```
+
 
 Recently, @Popkin2023 explored the effects of being an enforcer on mortality rates, ages at death, and causes of death to address the long-term impact this repeated contact might have. They defined enforcers in two ways: (1) those who had 50 or more career fights (E-F cohort) and (2) those who had, on average, more than 3 penalty minutes per game (E-P cohort). 
 
@@ -208,8 +218,10 @@ However, we believe that some of the methods used in @Popkin2023 to reach these 
 
 Here, we attempt not to replicate the results of the analysis in @Popkin2023, but what we believe to be more appropriate statistical analysis, specifically survival analysis methodology. This shift in perspective allows us to overcome the weakness of mortality rate, which is that it is a function of when it is calculated (i.e. In all cases, mortality rate will be 100% when all members of the original sample have died). Instead, survival analysis provides a survival curve, which can be used to analyze how the probability of survival changes over time.  In addition, we augmented the data used in @Popkin2023 to increase the sample size in the analysis and include more deceased players in the data set. 
 
+As mentioned earlier, the outcome of this study is relevant to the debates about regulations and discourse around head trauma in hockey. An accurate analysis is imperative to prevent the spread of misinformed conclusions and best inform regulatory safety practices going forward.
 
-As mentioned earlier, the outcome of this study is relevant to the debates about regulations and discourse around head trauma in hockey. An accurate analysis is imperative to prevent the spread of misinformed conclusions. ... talk about our conclusions
+... talk about our conclusions
+
 
 <!-- we instead found more data using web-scraping methods and the NHL website to facilitate a reanalysis of the effects of being an enforcer in terms of survival time rather than mortality rate. This shift in perspective allows us to overcome the downfall of mortality rate, which is that it is a function of when it is calculated. Eventually, the mortality rate will always be 100% when all members of the original sample have died. Instead, survival analysis provides a survival curve, which can be used to analyze how the probability of survival changes over time.  -->
 
@@ -293,7 +305,7 @@ Of the players included in the analysis, on average, enforcers in this data set 
  \hline
 \end{tabular}
 \end{center}
-\caption{Comparing enforcers to non enforcers when enforcer is defined as E-F \label{tab:EDAEF}}
+\caption{Comparing enforcers to non-enforcers when enforcer is defined as E-F \label{tab:EDAEF}}
 \end{table}
 
 
@@ -313,7 +325,7 @@ Of the players included in the analysis, on average, enforcers in this data set 
 \end{tabular}
 \end{center}
 
-\caption{Comparing enforcers to non enforcers when enforcer is defined as E-P \label{tab:EDAEP}}
+\caption{Comparing enforcers to non-enforcers when enforcer is defined as E-P \label{tab:EDAEP}}
 \end{table}
 
 
@@ -480,9 +492,50 @@ xtable(summary(a)$coef)
 
 
 # Results {#sec:results}
-Table \ref{tab:EF} shows the results for the Cox proportional hazards model when enforcers were defined based on their number of career fights.  No statistically significant difference was observed in the hazard functions of enforcers versus non enforcers (p-value = 0.549). However, a significant difference is observed between enforcers and non-enforcers when the enforcer is defined based on their number of penalty minutes per game (p-value = 0.00169).  The estimated hazard ratio for E-P is 2.29, indicating a 129\% increase in the hazard for enforcers vs non-enforcers when all other variables are held constant.  
+Table \ref{tab:EF} shows the results for the Cox proportional hazards model when enforcers were defined based on their number of career fights.  No statistically significant difference was observed in the hazard functions of enforcers versus non-enforcers (p-value = 0.549). However, a significant difference is observed between enforcers and non-enforcers when the enforcer is defined based on their number of penalty minutes per game (p-value = 0.00169).  The estimated hazard ratio for E-P is 2.29, indicating a 129\% increase in the hazard for enforcers vs non-enforcers when all other variables are held constant.  
 
-Figure \@ref{fig:estsurv} shoes the estimated survival curves for enforcers versus non-enforcers (E-P) for defenders with all continuous variables held constant at mean levels.  Using this, the estimated survival rate at the age of 50 for enforcers vs non-enforcers is 96.57\% (95\% CI: 94.63\%, 98.56\%) vs 98.49\% (95\% CI: 97.98\%, 99.00\%).  For the same conditions at the age of 75, the estimated survival rate for enforcers is about 74.4\% (95\% CI: 61.4\%, 90.32\%) compared to non-enforcers estimate survival rate of 87.95\% (95\% CI: 83.09\%, 93.10\%).  
+Figure \ref{fig:estsurv} shows the estimated survival curves for enforcers (E-P) versus non-enforcers for defenders with all continuous variables held constant at mean levels.  Using this, the estimated survival rate at the age of 50 for enforcers vs non-enforcers is 96.57\% (95\% CI: 94.63\%, 98.56\%) vs 98.49\% (95\% CI: 97.98\%, 99.00\%).  For the same conditions at the age of 75, the estimated survival rate for enforcers is about 74.4\% (95\% CI: 61.4\%, 90.32\%) compared to non-enforcers estimate survival rate of 87.95\% (95\% CI: 83.09\%, 93.10\%).  The estimated survival rate for enforcers drops an additional `r (96.57-74.4)-(98.49 - 87.95)`\% between the ages of 50 and 75 versus non-enforcers.
+
+These results suggest that the conclusions of @Popkin2023 are overstated due to the differences in exposure time between the groups at the time of their final analysis.
+
+
+
+
+join all from jama nhl data, condition on death from jama deaths and look at yob between enforcer/control
+```{r}
+cf = read.csv('../JAMA NHL Data/C-F-Table 1.csv')
+cp = read.csv('../JAMA NHL Data/C-P-Table 1.csv')
+
+ef = read.csv('../JAMA NHL Data/E-F-Table 1.csv')
+ep = read.csv('../JAMA NHL Data/E-P-Table 1.csv')
+
+jama_controls = dat %>% filter(Player %in% cf$Player | Player %in% cp$Player)
+  
+jama_enforcers = dat %>% filter(Player %in% ef$Player | Player %in% ep$Player)
+
+jama_short = rbind(jama_controls, jama_enforcers)
+
+jama_deaths = read.csv('../JAMA NHL Data/Deaths-Table 1.csv')
+
+
+jama_short %>%
+  filter(Player %in% jama_deaths$Enforcers) %>%
+  mutate(enforcer = ifelse(EF == 1 | EP == 1, 1, 0)) %>% 
+  group_by(enforcer) %>%
+  summarize(mean(DOB.Year))
+
+
+jama_short %>%
+  mutate(deathage = as.numeric(difftime(Death.Date,
+                                        Birth.Date,
+                                        units = "weeks")/52.25)) %>%
+  filter(Player %in% jama_deaths$Enforcers) %>%
+  mutate(enforcer = ifelse(EF == 1 | EP == 1, 1, 0)) %>% 
+  group_by(enforcer) %>%
+  summarize(mean(deathage))
+
+
+```
 
 
 
@@ -540,7 +593,7 @@ E-P TRUE & 0.83023 & 2.29385 & 0.26443 & 0.00169 \\
 
 
 
-```{r estsurv, echo = FALSE, fig.cap = "Estimated Survival curve for EP for defenders.  All other variables are fixed at their mean level (GP = 285.8, Ht = 72.7in, Wt = 197.03, and Year of birth 1974.5."}
+```{r estsurv, echo = FALSE, fig.cap = "Estimated Survival curve for E-P for defenders.  All other variables are fixed at their mean level (GP = 285.8, Ht = 72.7in, Wt = 197.03, and Year of birth 1974.5)"}
 coxphmod_EP <- coxph(Surv ~ EP + GP.x + Ht + Wt + DOB.Year + Pos2, data = dat)
 # summary(coxphmod_EP)
 # library(xtable)
@@ -589,6 +642,9 @@ Age difference statement in Popkin is over stated.
 # Conclusion {#sec:conclusion}
 
 # Acknowledgements {-}
+
+We would like to thank @Popkin2023 for their generosity and willingness to share the data provided for the above analysis.
+
 
 # Supplementary Material {-}
 
