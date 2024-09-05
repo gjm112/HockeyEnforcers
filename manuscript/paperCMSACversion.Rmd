@@ -277,7 +277,8 @@ For direct comparison to @Popkin2023, we defined enforcers using the same two de
  2. Enforcers-Penalty Minutes (E-P): Any player who averaged at least 3 penalty minutes per game (n = 183)
 
 
-We note than in @Popkin2023, they find 183 E-P enforcers; we have only 182 in our data set with the discrepancy due the the removal of the 4 players with missing height information.  
+We note than in @Popkin2023, they find 183 E-P enforcers; we have only 182 in our data set with the discrepancy due the the removal of the 4 players with missing height information, which is necessary to perform the survival analysis. 
+
 
 ## Additional Data
 While @Popkin2023 only looks at a total of 45 deceased players  (21 enforcers and 24 controls), we identified `r sum(dat$dead)` players who were included in the data used in @Popkin2023 who were deceased as of May 7, 2023 based on data from hockey-reference.com.  
@@ -549,13 +550,7 @@ Table \ref{tab:EF} shows the results for the Cox proportional hazards model when
 
 Figure \ref{fig:estsurv} shows the estimated survival curves for enforcers (E-P) versus non-enforcers for defenders with all continuous variables held constant at mean levels.  Using this, the estimated survival rate at the age of 50 for enforcers vs non-enforcers is 96.57\% (95\% CI: 94.63\%, 98.56\%) vs 98.49\% (95\% CI: 97.98\%, 99.00\%).  For the same conditions at the age of 75, the estimated survival rate for enforcers is about 74.4\% (95\% CI: 61.4\%, 90.32\%) compared to non-enforcers estimate survival rate of 87.95\% (95\% CI: 83.09\%, 93.10\%).  The estimated survival rate for enforcers drops an additional `r (96.57-74.4)-(98.49 - 87.95)`\% between the ages of 50 and 75 versus non-enforcers.
 
-These results suggest that the conclusions of @Popkin2023 are overstated due to the differences in exposure time between the groups at the time of their final analysis.
-
-
-
-
-join all from jama nhl data, condition on death from jama deaths and look at yob between enforcer/control
-```{r}
+```{r popkin_conclusions, echo = FALSE, tab.cap = ""}
 cf = read.csv('../JAMA NHL Data/C-F-Table 1.csv')
 cp = read.csv('../JAMA NHL Data/C-P-Table 1.csv')
 
@@ -571,24 +566,39 @@ jama_short = rbind(jama_controls, jama_enforcers)
 jama_deaths = read.csv('../JAMA NHL Data/Deaths-Table 1.csv')
 
 
-jama_short %>%
+cnclsn_sum = jama_short %>%
   filter(Player %in% jama_deaths$Enforcers) %>%
-  mutate(enforcer = ifelse(EF == 1 | EP == 1, 1, 0)) %>% 
-  group_by(enforcer) %>%
-  summarize(mean(DOB.Year))
-
-
-jama_short %>%
-  mutate(deathage = as.numeric(difftime(Death.Date,
+  mutate(enforcer = ifelse(EF == 1 | EP == 1, 1, 0), 
+         deathage = as.numeric(difftime(Death.Date,
                                         Birth.Date,
-                                        units = "weeks")/52.25)) %>%
-  filter(Player %in% jama_deaths$Enforcers) %>%
-  mutate(enforcer = ifelse(EF == 1 | EP == 1, 1, 0)) %>% 
+                                        units = "weeks")/52.25)) %>% 
   group_by(enforcer) %>%
-  summarize(mean(deathage))
-
+  summarize(mean_YOB = mean(DOB.Year), mean_age_at_death = mean(deathage))
 
 ```
+<!-- latex table generated in R 4.4.1 by xtable 1.8-4 package
+Wed Sep  4 18:44:57 2024-->
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrr}
+  \hline
+ & enforcer & mean\_YOB & mean\_age\_at\_death \\ 
+  \hline
+1 & 0.00 & 1958.29 & 56.46 \\ 
+  2 & 1.00 & 1962.81 & 47.15 \\ 
+   \hline
+\end{tabular}
+\caption{Original Paper Conclusions Data Summary
+ \label{tab:popkin_conclusions}}
+\end{table}
+
+
+
+These results suggest that the conclusions of @Popkin2023 are overstated due to the differences in exposure time between the groups at the time of their final analysis. Table \ref{tab:popkin_conclusions} 
+
+
+
 
 
 
@@ -723,7 +733,7 @@ efcountry <- dat %>% mutate(northamerica = ifelse(Ctry %in% c("USA","CAN"),"Nort
 
 Perhaps more interestingly, we find highly significant differences in geographic region of enforcers vs non-enforcers for both definitions.  In the enforcer group `r paste0(100*round(efcountry$p[efcountry$EF],4),"\\%")` and `r paste0(100*round(epcountry$p[epcountry$EP],4),"\\%")` of those groups are from North America (i.e. United States or Canada) for E-F and E-P, respectively.  For non-enforcers, North American players make up only `r paste0(100*round(efcountry$p[!efcountry$EF],4),"\\%")` for E-F and `r paste0(100*round(epcountry$p[!epcountry$EP],4),"\\%")` for E-P.  For both definitions of enforcer, these differences are significant with p-values for both definitions less than 0.0001.   
 
-While we do not address this imbalance here, as we focus on closely following the work of @Popkin23, it is worth noting the substantial imbalance in geographic origin (i.e. North American vs outside of North America) of enforcers versus non-enforcer.
+While we do not address this imbalance here, as we focus on closely following the work of @Popkin2023, it is worth noting the substantial imbalance in geographic origin (i.e. North American vs outside of North America) of enforcers versus non-enforcer.
 
 
 
