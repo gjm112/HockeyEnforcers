@@ -504,7 +504,7 @@ ggdat <- data.frame(enforcer = c(rep("Enforcer",nnn),rep("Non-Enforcer",nnn)),
   survfit(coxphmod_EP, newdata = newdataEP)$surv[, 1],
   survfit(coxphmod_EP, newdata = newdataEP)$surv[, 2]
 ),
-  lower = c(
+  lower = c( 
   survfit(coxphmod_EP, newdata = newdataEP)$lower[, 1],
   survfit(coxphmod_EP, newdata = newdataEP)$lower[, 2]
 ),
