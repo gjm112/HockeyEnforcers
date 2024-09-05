@@ -202,7 +202,6 @@ summEP <-
     pC = round(mean(Pos2 == "C"),3)
   )
 
-
 ```   
 
 
@@ -216,22 +215,28 @@ Fighting in the National Hockey League (NHL) has been an integral part of the sp
 
 @Silverwood2015 looked anecdotally at how enforcers fit into a team atmosphere noticed that teammates put their enforcers on a pedestal. Performing well as an enforcer leads to the player being seen as a protector. When an enforcer fulfills these additional responsibilities to being on the ice as a normal player, players say that it is common for that enforcer to receive perks, such as not paying for their own meals or getting the best seat on the bus. They go as far as to say these players are "deified", emphasizing the social aspects of hockey that surround this history of violence. 
 
-While any player on a hockey team can get into a fight, enforcers are exposed to many more fights than the typical NHL player. As a result of being exposed to additional contact, they are potentially exposed to additional head trauma beyond the amount associated with playing hockey. There are many questions about the long-term implications of this head trauma and its potential to result in negative health outcomes in the future. The ingrained nature of fighting into the game of hockey is greatly criticized and there are many active debates about its current declining trend. Figure \ref{fig:enforcer_density} shows a decline in the proportion of enforcers to non-enforcers as players get younger. The question is, should the game continue to move away from contact-driven strategy in favor of younger, faster, highly-skilled players?
+While any player on a hockey team can get into a fight, enforcers are exposed to many more fights than the typical NHL player. As a result of being exposed to additional contact, they are potentially exposed to additional head trauma beyond the amount associated with playing hockey. There are many questions about the long-term implications of this head trauma and its potential to result in negative health outcomes in the future. The ingrained nature of fighting into the game of hockey is greatly criticized and there are many active debates about its current declining trend. Figure \ref{fig:enforcer_density} shows a decline in the proportion of enforcers to non-enforcers as players  were born more recently. The question is, should the game continue to move away from contact-driven strategy in favor of younger, faster, highly-skilled players?
 
 ```{r enforcer_density, echo = FALSE, fig.cap='Density Plot of Study Cohorts by DOB'}
 cohort_dat = dat %>% mutate(cohort = case_when(PIM.GP > 3 ~ 'Enforcer',
-                                  Total.Fights > 50 ~ 'Enforcer',
+                                  #Total.Fights > 50 ~ 'Enforcer',
                                   .default = 'Non-Enforcer')) 
 
 cohort_dat$cohort = as.factor(cohort_dat$cohort)
 
-ggplot(cohort_dat, aes(x = DOB)) + geom_density(aes(fill = cohort),alpha = 0.75 )
+cohort_dat$cohort <- factor(cohort_dat$cohort, levels = c('Non-Enforcer', 'Enforcer'))
+
+#ggplot(cohort_dat, aes(x = DOB)) + geom_density(aes(fill = cohort),alpha = 0.75 )
+
+ggplot(cohort_dat, aes(x = DOB)) +
+  geom_freqpoly(aes(color = cohort),alpha = 0.75 , position = 'stack') +
+  scale_color_manual(values = c('#00bFC4', '#F8766d'))
 ```
 
 
 Recently, @Popkin2023 explored the effects of being an enforcer on mortality rates, ages at death, and causes of death to address the long-term impact this repeated contact might have. They defined enforcers in two ways: (1) those who had 50 or more career fights (E-F cohort) and (2) those who had, on average, more than 3 penalty minutes per game (E-P cohort). 
 
-Based on their analysis (a matched cohort study) they find that there is no statistically significant difference in the mortality rates between enforcers and controls for either definition of enforcer, but they do conclude that enforcers died on average about 10 years earlier than their non-enforcer counterparts. In addition, they draw the conclusion that there is not a significant difference in all-cause mortality rate but find enforcers died more frequently of drug overdose and suicide. 
+Based on this matched cohort study, they conclude that there is no statistically significant difference in the mortality rates between enforcers and controls for either definition of enforcer. However, they do find that enforcers died on average about 10 years earlier than their non-enforcer counterparts and more frequently of drug overdose and suicide. 
 
 <!-- Most notably, the method used to reached their most sensational finding - enforcers died on average about 10 years earlier than their non-enforcer counterparts - is statistically unsuitable. Specifically, to reach this conclusion, they use the data from the matched cohort study but then condition on death.  This effectively breaks the matching that they appropriately used to compare mortality rates, and therefore this conclusion is not statistically valid.   -->
 
@@ -389,7 +394,7 @@ dat$Pos2[dat$Pos2 %in% c("L","R")] <- "W"
 dat$Pos2 <- factor(dat$Pos2)
 ```
 
-```{r KMEF, echo = FALSE, fig.cap="Kaplan Meier plot for EF" }
+```{r KMEF, echo = FALSE, fig.cap="Kaplan Meier plot for E-F" }
 library(ggsurvfit)
 survfit2(Surv ~ EFchar, data = dat) %>%
   ggsurvfit() +
@@ -400,7 +405,7 @@ survfit2(Surv ~ EFchar, data = dat) %>%
   add_confidence_interval()
 ```
 
-```{r KMEP, echo = FALSE, fig.cap="Kaplan Meier plot for EP" }
+```{r KMEP, echo = FALSE, fig.cap="Kaplan Meier plot for E-P" }
 library(ggsurvfit)
 survfit2(Surv ~ EPchar, data = dat) %>% 
   ggsurvfit() +
@@ -434,9 +439,9 @@ The analysis presented here utilizes all hockey players in the data, both alive 
  <!-- [[Why do we think survival analysis is the correct choice for analyzing this data.  Explain.  ]] -->
  <!-- See example 2 here for the problem with mortality rate: https://www.mcw.edu/-/media/MCW/Departments/Biostatistics/vo18no5online.pdf -->
 
-Figures \ref{fig:KMEF} and \ref{fig:KMEP} show Kaplan-Meier plots for EF and EP.  There is substantial overlap in the K-M curves between the enforcer and non-enforcers groups when enforcers is defined using the EF criteria. However, the enforcer group when defined by the EP criteria exhibits evidence of lower survival probabilities starting around age 50 relative to the non-enforcer group, though it is important to remember that these two groups differ substantially in age, height, and weight.
+Figures \ref{fig:KMEF} and \ref{fig:KMEP} show Kaplan-Meier plots for E-F and E-P.  There is substantial overlap in the K-M curves between the enforcer and non-enforcers groups when enforcers is defined using the EF criteria. However, the enforcer group when defined by the EP criteria exhibits evidence of lower survival probabilities starting around age 50 relative to the non-enforcer group, though it is important to remember that these two groups differ substantially in age, height, and weight.
 
-In order to account for these differences betwen the groups, Cox proportional hazards models @CoxPH were fit: one for each definition of enforcer defined in @Popkin2023 (i.e. E-F and E-P) with time until death as the outcome variable.  In addition, the indicators for each definition of enforcer, games played (GP), height (Ht), weight (Wt), year of birth (DOB), and position indicators (Center (C), Wing (W), or Defender (D)) were added to each model as control variables.  
+In order to account for these differences between the groups, Cox proportional hazards models (@CoxPH) were fit: one for each definition of enforcer defined in @Popkin2023 (i.e. E-F and E-P) with time until death as the outcome variable.  In addition, the indicators for each definition of enforcer, games played (GP), height (Ht), weight (Wt), year of birth (DOB), and position indicators (Center (C), Wing (W), or Defender (D)) were added to each model as control variables.  
 
 All analysis was performed in R version 4.4.0 @R using the survival library @survival-book.  
 
@@ -551,6 +556,7 @@ Table \ref{tab:EF} shows the results for the Cox proportional hazards model when
 
 Figure \ref{fig:estsurv} shows the estimated survival curves for enforcers (E-P) versus non-enforcers for defenders with all continuous variables held constant at mean levels.  Using this, the estimated survival rate at the age of 50 for enforcers vs non-enforcers is 96.57\% (95\% CI: 94.63\%, 98.56\%) vs 98.49\% (95\% CI: 97.98\%, 99.00\%).  For the same conditions at the age of 75, the estimated survival rate for enforcers is about 74.4\% (95\% CI: 61.4\%, 90.32\%) compared to non-enforcers estimate survival rate of 87.95\% (95\% CI: 83.09\%, 93.10\%).  The estimated survival rate for enforcers drops an additional `r (96.57-74.4)-(98.49 - 87.95)`\% between the ages of 50 and 75 versus non-enforcers.
 
+<!--
 ```{r popkin_conclusions, echo = FALSE, tab.cap = ""}
 cf = read.csv('../JAMA NHL Data/C-F-Table 1.csv')
 cp = read.csv('../JAMA NHL Data/C-P-Table 1.csv')
@@ -585,27 +591,15 @@ precnclsn_sum = jama_short %>%
   summarize(`Mean YOB` = mean(DOB.Year), `Mean Age At Death` = mean(deathage))
 
 ```
-<!-- latex table generated in R 4.4.1 by xtable 1.8-4 package
-Wed Sep  4 18:44:57 2024-->
+ latex table generated in R 4.4.1 by xtable 1.8-4 package
+Wed Sep  4 18:44:57 2024
 
-\begin{table}[ht]
-\centering
-\begin{tabular}{rrrrr}
-  \hline
- & enforcer & mean\_YOB & mean\_age\_at\_death \\ 
-  \hline
-1 & 0.00 & 1958.29 & 56.46 \\ 
-  2 & 1.00 & 1962.81 & 47.15 \\ 
-   \hline
-\end{tabular}
-\caption{Original Paper Conclusions Data Summary
- \label{tab:popkin_conclusions}}
-\end{table}
+
 
 
 
 These results suggest that the conclusions of @Popkin2023 are overstated. We believe this may be due to the differences in exposure time between the groups at the time of their concluding analysis. Table \ref{tab:popkin_conclusions} shows that by conditioning on death, the mean year of birth becomes significantly different between enforcer vs non-enforcer groups. Before conditioning on death, the mean year of birth for each group was `r round(precnclsn_sum[[1,2]], 2)` for non-enforcers and `r round(precnclsn_sum[[2,2]], 2)` for enforcers. Conditioning on death contradicts any previous equality of means due to matching, resulting in the enforcer group having an average year of birth much later than the control group, and thereby it is no longer appropriate to compare their mortality rate BECAUSEEEE.....
-
+-->
 
 
 
@@ -707,9 +701,9 @@ ggplot(aes(x = time,y = surv, color = enforcer), data = ggdat) + geom_path() + g
 
 ```
 
-Talk about the conditioning on death stuff.  
+<!--Talk about the conditioning on death stuff.  
 
-Age difference statement in Popkin is over stated.  
+Age difference statement in Popkin is over stated.  -->
 
 # Conclusion {#sec:conclusion}
 @Popkin2023 presented work looking for differences in mortality rates between NHL enforcers and non-enforcers who played between 1967 and 2022 where they defined enforcers in two ways: one based on the number of career fights and the other based on the average career penalty minutes per game.  They performed a matched-cohort study matching on date of birth, total number of games played, height, weight, and position.  They conclude there there is no statistically significant difference in the mortality rates for either definition of enforcer.  They then go on to perform an additional analytics where they condition on death and show that of players in their matched data set who are deceased, enforcers, using either definition, died an average of about 10 years earlier than their non-enforcer counterparts.  
