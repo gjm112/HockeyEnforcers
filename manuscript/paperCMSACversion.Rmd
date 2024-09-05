@@ -277,7 +277,7 @@ For direct comparison to @Popkin2023, we defined enforcers using the same two de
  2. Enforcers-Penalty Minutes (E-P): Any player who averaged at least 3 penalty minutes per game (n = 183)
 
 
-We note than in @Popkin2023, they find 183 E-P enforcers; we have only 182 in our data set with the discrepancy due the the removal of the 4 players with missing height information, which is necessary to perform the survival analysis. 
+We note than in @Popkin2023, they find 183 E-P enforcers; we have only 182 in our data set with the discrepancy due the the removal of the 4 players with missing height information, which is used as a control variable in the survival analysis. 
 
 
 ## Additional Data
@@ -435,7 +435,7 @@ The analysis presented here utilizes all hockey players in the data, both alive 
 
 Figures \ref{fig:KMEF} and \ref{fig:KMEP} show Kaplan-Meier plots for EF and EP.  There is substantial overlap in the K-M curves between the enforcer and non-enforcers groups when enforcers is defined using the EF criteria. However, the enforcer group when defined by the EP criteria exhibits evidence of lower survival probabilities starting around age 50 relative to the non-enforcer group, though it is important to remember that these two groups differ substantially in age, height, and weight.
 
-In order to account for these differences betwen the groups, Cox proportional hazards models @CoxPH were fit: one for each definition of enforcer defined in @Popkin2023 (i.e. E-F and E-P) with time until death as the outcome variable.  In addition, to indicators for each definition of enforcer, games played (GP), height (Ht), weight (Wt), year of birth (DOB), and position indicators (Center (C), Wing (W), or Defender (D)) were added to each model as control variables.  
+In order to account for these differences betwen the groups, Cox proportional hazards models @CoxPH were fit: one for each definition of enforcer defined in @Popkin2023 (i.e. E-F and E-P) with time until death as the outcome variable.  In addition, the indicators for each definition of enforcer, games played (GP), height (Ht), weight (Wt), year of birth (DOB), and position indicators (Center (C), Wing (W), or Defender (D)) were added to each model as control variables.  
 
 All analysis was performed in R version 4.4.0 @R using the survival library @survival-book.  
 
@@ -573,7 +573,15 @@ cnclsn_sum = jama_short %>%
                                         Birth.Date,
                                         units = "weeks")/52.25)) %>% 
   group_by(enforcer) %>%
-  summarize(mean_YOB = mean(DOB.Year), mean_age_at_death = mean(deathage))
+  summarize(`Mean YOB` = mean(DOB.Year), `Mean Age At Death` = mean(deathage))
+
+precnclsn_sum = jama_short %>%
+  mutate(enforcer = ifelse(EF == 1 | EP == 1, 1, 0), 
+         deathage = as.numeric(difftime(Death.Date,
+                                        Birth.Date,
+                                        units = "weeks")/52.25)) %>% 
+  group_by(enforcer) %>%
+  summarize(`Mean YOB` = mean(DOB.Year), `Mean Age At Death` = mean(deathage))
 
 ```
 <!-- latex table generated in R 4.4.1 by xtable 1.8-4 package
@@ -595,7 +603,7 @@ Wed Sep  4 18:44:57 2024-->
 
 
 
-These results suggest that the conclusions of @Popkin2023 are overstated due to the differences in exposure time between the groups at the time of their final analysis. Table \ref{tab:popkin_conclusions} 
+These results suggest that the conclusions of @Popkin2023 are overstated. We believe this may be due to the differences in exposure time between the groups at the time of their concluding analysis. Table \ref{tab:popkin_conclusions} shows that by conditioning on death, the mean year of birth becomes significantly different between enforcer vs non-enforcer groups. Before conditioning on death, the mean year of birth for each group was `r round(precnclsn_sum[[1,2]], 2)` for non-enforcers and `r round(precnclsn_sum[[2,2]], 2)` for enforcers. Conditioning on death contradicts any previous equality of means due to matching, resulting in the enforcer group having an average year of birth much later than the control group, and thereby it is no longer appropriate to compare their mortality rate BECAUSEEEE.....
 
 
 
