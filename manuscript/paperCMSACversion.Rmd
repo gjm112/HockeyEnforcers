@@ -248,11 +248,16 @@ Based on their analysis (a matched cohort study) they find that there is no stat
 
 However, we believe that some of the statistical methods used in @Popkin2023 to reach these conclusions are not the best choices given the problem that is studied.  Here, we attempt not to replicate the results of the analysis in @Popkin2023, but what we believe to be more appropriate statistical methods, specifically survival analysis techniques. This shift in perspective allows us to overcome the weakness of mortality rate, which is that it is a function of when it is calculated (i.e. In all cases, mortality rate will be 100% when all members of the original sample have died). Instead, survival analysis provides a survival curve, which can be used to analyze how the probability of survival changes over time.  In addition, we augmented the data used in @Popkin2023 to increase the sample size in the analysis and include more deceased players in the data set. 
 
-The outcome of this study is relevant to the debates about regulations and discourse around head trauma in hockey (and other sports).   
+The outcome of this study is relevant to the debates about regulations and discourse around head trauma in hockey (and other sports).  An accurate analysis is imperative to prevent the spread of misinformed conclusions and best inform regulatory safety practices going forward.  
+
+There is much work demonstrating that elite athletes on average live longer than the general population. @Antero2021, as just one example, estimates that "Olympic athletes live 5.1 years longer than the general population" and @Garatachea2014 presents a large meta-analysis of elite-level athletes life spans and concludes that life expectancy for these elite-level athletes is higher when compared to the population at large.  
+
+However, several studies that have examined life expectancy for athletes involved in sports with more physical contact / more collisions have found evidence of associations between this contact and reduced life expectancy.  @Zwiers2012 examined Olympians across many sports and found that those elite athletes participating in sports with high levels of physical contact exhibited mortality at higher rates later in life than Olympians in less contact heavy sports.  They then estimate the hazard ratio associated with high contact sports to be 1.13 (95% CI: 1.06-1.21).  @Bianco2007 looked at life expectancy across different sports and did not find any significant results.  However, they note that the median life expectancy for boxers was 73 years compared to an overall median of 76 years.  
+
+The topic of @Popkin2023's study fits in with this line of work with a focus specifically on one type of hockey player (i.e. the enforcer).  While these did not identify any significant differences in mortality rates between the enforcers and non-enforcers, they do find shorter lifespans among enforcers who were deceased.  We believe that this topic is of great interest, which is why we engaged in a re-analysis with additional data of the original work.  By using more appropriate statistical techniques, out hope is to gain a clearer picture of the 
+the conclusions reacdhed in the original work of @Popkin2023.  
 
 
-An accurate analysis is imperative to prevent the spread of misinformed conclusions and best inform regulatory safety practices going forward.  There is much work demonstrating that elite athletes on average live longer than the general population. @Antero2021, as just one example, estimates that "Olympic athletes live 5.1 years longer than the general population" and @Garatachea2014 presents a large meta-analysis of elite-level athletes life spans and concludes that life expectancy for these elite-level athletes is higher when compared to the population at large.  
-However, several studies that have examined life expectancy for athletes involved in sports with more physical contact/ more collisions have found evidence of associations between this contact and reduced life expectancy.  @Zwiers2012 examined Olympians across many sports and found that those elite athletes participating in sports with high levels of physical contact exhibited mortality at higher rates later in life than Olympians in less contact heavy sports.  They then estimate the hazard ratio associated with high contact sports to be 1.13 (95% CI: 1.06-1.21).  @Bianco2007 looked at life expectancy across different sports and did not find any significant results.  However, they note that the median life expectancy for boxers was 73 years compared to an overall median of 76 years.   
 
 <!-- https://journals.lww.com/headtraumarehab/fulltext/2012/11000/Life_Expectancy_Following_Rehabilitation__A_NIDRR.15.aspx -->
 
@@ -275,7 +280,7 @@ However, several studies that have examined life expectancy for athletes involve
 
 
 
-... talk about our conclusions
+
 
 
 <!-- we instead found more data using web-scraping methods and the NHL website to facilitate a reanalysis of the effects of being an enforcer in terms of survival time rather than mortality rate. This shift in perspective allows us to overcome the downfall of mortality rate, which is that it is a function of when it is calculated. Eventually, the mortality rate will always be 100% when all members of the original sample have died. Instead, survival analysis provides a survival curve, which can be used to analyze how the probability of survival changes over time.  -->
@@ -583,9 +588,23 @@ xtable(summary(a)$coef)
 
 
 # Results {#sec:results}
-Table \ref{tab:EF} shows the results for the Cox proportional hazards model when enforcers were defined based on their number of career fights.  No statistically significant difference was observed in the hazard functions of enforcers versus non-enforcers (p-value = 0.549). However, a significant difference is observed between enforcers and non-enforcers when the enforcer is defined based on their number of penalty minutes per game (p-value = 0.00169).  The estimated hazard ratio for E-P is 2.29, indicating a 129\% increase in the hazard for enforcers vs non-enforcers when all other variables are held constant.  
+Table \ref{tab:EF} shows the results for the Cox proportional hazards model when enforcers were defined based on their number of career fights.  No statistically significant difference was observed in the hazard functions of enforcers versus non-enforcers (p-value = 0.48977). However, a significant difference is observed between enforcers and non-enforcers when the enforcer is defined based on their number of penalty minutes per game (p-value = 0.00125).  The estimated hazard ratio for E-P is 2.34988, indicating a 135\% increase in the hazard for enforcers vs non-enforcers when all other variables are held constant.  
 
-Figure \ref{fig:estsurv} shows the estimated survival curves for enforcers (E-P) versus non-enforcers for defenders with all continuous variables held constant at mean levels.  Using this, the estimated survival rate at the age of 50 for enforcers vs non-enforcers is 96.57\% (95\% CI: 94.63\%, 98.56\%) vs 98.49\% (95\% CI: 97.98\%, 99.00\%).  For the same conditions at the age of 75, the estimated survival rate for enforcers is about 74.4\% (95\% CI: 61.4\%, 90.32\%) compared to non-enforcers estimate survival rate of 87.95\% (95\% CI: 83.09\%, 93.10\%).  The estimated survival rate for enforcers drops an additional `r (96.57-74.4)-(98.49 - 87.95)`\% between the ages of 50 and 75 versus non-enforcers.
+<!-- These numbers need to be recomputed -->
+Figure \ref{fig:estsurv} shows the estimated survival curves for enforcers (E-P) versus non-enforcers for defenders with all continuous variables held constant at mean levels.  Using this, the estimated survival rate at the age of 50 for enforcers vs non-enforcers is 96.45\% (95\% CI: 94.44\%, 98.51\%) vs 98.47\% (95\% CI: 97.96\%, 98.99\%).  For the same conditions at the age of 75, the estimated survival rate for enforcers is about 74.01\% (95\% CI: 60.78\%, 90.23\%) compared to non-enforcers estimate survival rate of 88.00\% (95\% CI: 83.11\%, 93.18\%).  The estimated survival rate for enforcers drops an additional `r (96.45-74.01)-(98.47 - 88.00)`\% between the ages of 50 and 75 versus non-enforcers.
+
+
+
+
+
+<!-- ind surv lower upper time -->
+<!-- Enforcer	0.9644902	0.9443574	0.9850521	50 -->
+<!-- Non-Enforcer	0.9847316	0.9795597	0.9899308	50 -->
+ 
+<!--        enforcer      surv     lower     upper     time -->
+<!-- 1     Enforcer 0.7405606 0.6078206 0.9022894 75.01096 -->
+<!-- 2 Non-Enforcer 0.8800170 0.8311189 0.9317920 75.01096 -->
+
 
 <!--
 ```{r popkin_conclusions, echo = FALSE, tab.cap = ""}
@@ -622,26 +641,8 @@ precnclsn_sum = jama_short %>%
   summarize(`Mean YOB` = mean(DOB.Year), `Mean Age At Death` = mean(deathage))
 
 ```
- latex table generated in R 4.4.1 by xtable 1.8-4 package
-Wed Sep  4 18:44:57 2024
 
 
-
-
-
-These results suggest that the conclusions of @Popkin2023 are overstated. We believe this may be due to the differences in exposure time between the groups at the time of their concluding analysis. Table \ref{tab:popkin_conclusions} shows that by conditioning on death, the mean year of birth becomes significantly different between enforcer vs non-enforcer groups. Before conditioning on death, the mean year of birth for each group was `r round(precnclsn_sum[[1,2]], 2)` for non-enforcers and `r round(precnclsn_sum[[2,2]], 2)` for enforcers. Conditioning on death contradicts any previous equality of means due to matching, resulting in the enforcer group having an average year of birth much later than the control group, and thereby it is no longer appropriate to compare their mortality rate BECAUSEEEE.....
--->
-
-
-
-
-
-<!-- ind surv lower upper time -->
-<!-- Non-Enforcer 0.9849056 0.9798140 0.9900238 50.00000 -->
-<!--  Enforcer 0.9657134 0.9462748 0.9855513 50.00000 -->
- 
- <!-- Non-Enforcer 0.8795039 0.8308666 0.9309884 75.01096 -->
- <!-- Enforcer 0.7448857 0.6142941 0.9032394 75.01096 -->
 
 
 <!-- % latex table generated in R 4.2.2 by xtable 1.8-4 package -->
@@ -729,7 +730,7 @@ ggplot(aes(x = time,y = surv, color = enforcer), data = ggdat) + geom_path() + g
 
 #Survival rates are age 50. 
 #ggdat %>% filter(time == 50)
-
+#ggdat %>% filter(time > 75 & time < 75.02)
 ```
 
 <!--Talk about the conditioning on death stuff.  
@@ -737,12 +738,14 @@ ggplot(aes(x = time,y = surv, color = enforcer), data = ggdat) + geom_path() + g
 Age difference statement in Popkin is over stated.  -->
 
 # Conclusion {#sec:conclusion}
-@Popkin2023 presented work looking for differences in mortality rates between NHL enforcers and non-enforcers who played between 1967 and 2022 where they defined enforcers in two ways: one based on the number of career fights and the other based on the average career penalty minutes per game.  They performed a matched-cohort study matching on date of birth, total number of games played, height, weight, and position.  They conclude there there is no statistically significant difference in the mortality rates for either definition of enforcer.  They then go on to perform an additional analytics where they condition on death and show that of players in their matched data set who are deceased, enforcers, using either definition, died an average of about 10 years earlier than their non-enforcer counterparts.  
+@Popkin2023 presented work looking for differences in mortality rates between NHL enforcers and non-enforcers who played between 1967 and 2022 where they defined enforcers in two ways: one based on the number of career fights and the other based on the average career penalty minutes per game.  They performed a matched-cohort study matching on date of birth, total number of games played, height, weight, and position.  They conclude there there is no statistically significant difference in the mortality rates for either definition of enforcer.  They then go on to perform an additional analysis where they condition on death and show that of players in their matched data set who are deceased, enforcers died an average of about 10 years earlier than their non-enforcer counterparts.  
+
+While we found this work to be of interest, we believe that a more appropriate statistical framework for this analysis is survival analysis.  Therefore, we performed our own extended analysis with additional data using methods from survival analysis to estimate difference survival times between enforcers and non-enforcers.  For enforcers, defined based on number of career fights we find no significant difference in survival times.  Conversely, we do find a significant difference in survival times for enforcers defined based on average penalty minutes per game.  Specifically, we find that enforcers defined in this way have a hazard ratio of 2.34988
 
 
  <!-- including date of birth, total number of games played, height, weight, and position played. -->
 
-Talk about continuous penality minutes stuff?
+<!-- Talk about continuous penality minutes stuff? -->
 
 Unobserved Confounders: 
 We further note several additional difference between the enforcers and the non-enforcer groups that were not considered in the @Popkin2023.  As an example, the number of average number of goals scores between the two groups significantly different for both definitions of enforcers.  The average number of goals scores for E-F enforcers  vs non-enforcers was `r summ$mngoals[summ$EF]` vs `r summ$mngoals[!summ$EF]` (p-value: `r ifelse(round(t.test(dat$G~dat$EF)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$G~dat$EF)$p.value,2))`).  For E-P enforcers, the average number of goals for enforcers was `r summEP$mngoals[summEP$EP]` vs `r summEP$mngoals[!summEP$EP]` (p-value: `r ifelse(round(t.test(dat$G~dat$EP)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$G~dat$EP)$p.value,2))`).  
