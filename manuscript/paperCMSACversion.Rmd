@@ -786,6 +786,6 @@ We would like to thank @Popkin2023 for their generosity and willingness to share
 
 # Supplementary Material {-}
 
-All code for reproducing the analyses in this paper is publicly available at https://github.com/gjm112/HockeyEnforcers
+<!-- All code for reproducing the analyses in this paper is publicly available at https://github.com/gjm112/HockeyEnforcers -->
 
 # References
