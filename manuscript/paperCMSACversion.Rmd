@@ -213,11 +213,13 @@ Fighting in the National Hockey League (NHL) has been an integral part of the sp
 
 @Colburn1986 discusses the intentions behind these public fights. The crowd gets energized and entertained, but more importantly, the fight is a stage used to establish the social customs and expectations of players on the ice.  Specifically, they say, "insofar as the fist-fight is the locus of socially available beliefs concerning the moral character and integrity of players, ... the fist-fight represents a mode of informal social control among players".  
 
-@Silverwood2015 looked anecdotally at how enforcers fit into a team atmosphere noticed that teammates put their enforcers on a pedestal. Performing well as an enforcer leads to the player being seen as a protector. When an enforcer fulfills these additional responsibilities to being on the ice as a normal player, players say that it is common for that enforcer to receive perks, such as not paying for their own meals or getting the best seat on the bus. They go as far as to say these players are "deified", emphasizing the social aspects of hockey that surround this history of violence. 
+@Silverwood2015, who looked anecdotally at how enforcers fit into a team atmosphere,  noticed that teammates put their enforcers on a pedestal. Performing well as an enforcer leads to the player being seen as a protector. When an enforcer fulfills these additional responsibilities to being on the ice as a normal player, players say that it is common for that enforcer to receive perks, such as not paying for their own meals or getting the best seat on the bus. They go as far as to say these players are "deified", emphasizing the social aspects of hockey that surround this history of violence. 
 
-While any player on a hockey team can get into a fight, enforcers are exposed to many more fights than the typical NHL player. As a result of being exposed to additional contact, they are potentially exposed to additional head trauma beyond the amount associated with playing hockey. There are many questions about the long-term implications of this head trauma and its potential to result in negative health outcomes in the future. The ingrained nature of fighting into the game of hockey is greatly criticized and there are many active debates about its current declining trend. Figure \ref{fig:enforcer_density} shows a decline in the proportion of enforcers to non-enforcers as players  were born more recently. The question is, should the game continue to move away from contact-driven strategy in favor of younger, faster, highly-skilled players?
+While any player on a hockey team can get into a fight, enforcers are exposed to many more fights than the typical NHL player. As a result of being exposed to additional contact, they are potentially exposed to additional head trauma beyond the amount associated with playing hockey. There are many questions about the long-term implications of this head trauma and its potential to result in negative health outcomes in the future. The ingrained nature of fighting into the game of hockey is greatly criticized, and there are many active debates about its current declining trend. Figure \ref{fig:enforcer_density} shows a decline in the proportion of players in the league who are considered enforcers (as defined by @Popkin2023) among players were born more recently. 
+<!-- The question is, should the game continue to move away from contact-driven strategy in favor of younger, faster, highly-skilled players? -->
 
 ```{r enforcer_density, echo = FALSE, fig.cap='Density Plot of Study Cohorts by DOB'}
+#Note: I think the blue should be labeled as total players because it's stacked 
 cohort_dat = dat %>% mutate(cohort = case_when(PIM.GP > 3 ~ 'Enforcer',
                                   #Total.Fights > 50 ~ 'Enforcer',
                                   .default = 'Non-Enforcer')) 
@@ -234,7 +236,7 @@ ggplot(cohort_dat, aes(x = DOB)) +
 ```
 
 
-Recently, @Popkin2023 explored the effects of being an enforcer on mortality rates, ages at death, and causes of death to address the long-term impact this repeated contact might have. They defined enforcers in two ways: (1) those who had 50 or more career fights (E-F cohort) and (2) those who had, on average, more than 3 penalty minutes per game (E-P cohort). 
+@Popkin2023 explored the effects of being an enforcer on mortality rates, ages at death, and causes of death to address the long-term impact this repeated contact might have. They defined enforcers in two ways: (1) those who had 50 or more career fights (E-F cohort) and (2) those who had, on average, more than 3 penalty minutes per game (E-P cohort). 
 
 Based on this matched cohort study, they conclude that there is no statistically significant difference in the mortality rates between enforcers and controls for either definition of enforcer. However, they do find that enforcers died on average about 10 years earlier than their non-enforcer counterparts and more frequently of drug overdose and suicide. 
 
@@ -242,7 +244,32 @@ Based on this matched cohort study, they conclude that there is no statistically
 
 However, we believe that some of the statistical methods used in @Popkin2023 to reach these conclusions are not the best choices given the problem that is studied.  Here, we attempt not to replicate the results of the analysis in @Popkin2023, but what we believe to be more appropriate statistical methods, specifically survival analysis techniques. This shift in perspective allows us to overcome the weakness of mortality rate, which is that it is a function of when it is calculated (i.e. In all cases, mortality rate will be 100% when all members of the original sample have died). Instead, survival analysis provides a survival curve, which can be used to analyze how the probability of survival changes over time.  In addition, we augmented the data used in @Popkin2023 to increase the sample size in the analysis and include more deceased players in the data set. 
 
-As mentioned earlier, the outcome of this study is relevant to the debates about regulations and discourse around head trauma in hockey. An accurate analysis is imperative to prevent the spread of misinformed conclusions and best inform regulatory safety practices going forward.
+The outcome of this study is relevant to the debates about regulations and discourse around head trauma in hockey (and other sports).   
+
+
+An accurate analysis is imperative to prevent the spread of misinformed conclusions and best inform regulatory safety practices going forward.  There is much work demonstrating that elite athletes on average live longer than the general population. @Antero2021, as just one example, estimates that "Olympic athletes live 5.1 years longer than the general population" and @Garatachea2014 presents a large meta-analysis of elite-level athletes life spans and concludes that life expectancy for these elite-level athletes is higher when compared to the population at large.  
+However, several studies that have examined life expectancy for athletes involved in sports with more physical contact/ more collisions have found evidence of associations between this contact and reduced life expectancy.  @Zwiers2012 examined Olympians across many sports and found that those elite athletes participating in sports with high levels of physical contact exhibited mortality at higher rates later in life than Olympians in less contact heavy sports.  They then estimate the hazard ratio associated with high contact sports to be 1.13 (95% CI: 1.06-1.21).  @Bianco2007 looked at life expectancy across different sports and did not find any significant results.  However, they note that the median life expectancy for boxers was 73 years compared to an overall median of 76 years.   
+
+<!-- https://journals.lww.com/headtraumarehab/fulltext/2012/11000/Life_Expectancy_Following_Rehabilitation__A_NIDRR.15.aspx -->
+
+<!-- Bianco2007:  "Median LE of the samples was 76.0 yrs and no differences were observed in different sports, although it was lower in boxers (73.0 yrs) and higher in tennis players (79.0 yrs)."  -->
+
+<!-- "Those who engaged in disciplines with high levels of physical contact had higher mortality than other Olympians later in life." "the increased mortality associated with high physical contact persisted (hazard ratio 1.13, 1.06 to 1.21)" -->
+
+
+
+<!-- However, contact bla h blahj -->
+
+
+<!-- : The evidence available indicates that top-level athletes live longer than the general population and have a lower risk of 2 major causes of mortality, namely, CVD and cancer. -->
+
+
+
+<!-- Antero2021: Olympic athletes live 5.1 years longer than the general population. -->
+
+<!-- Zwiers2012: "Those who engaged in disciplines with high levels of physical contact had higher mortality than other Olympians later in life." "the increased mortality associated with high physical contact persisted (hazard ratio 1.13, 1.06 to 1.21)" -->
+
+
 
 ... talk about our conclusions
 
@@ -711,6 +738,7 @@ Age difference statement in Popkin is over stated.  -->
 
  <!-- including date of birth, total number of games played, height, weight, and position played. -->
 
+Talk about continuous penality minutes stuff?
 
 Unobserved Confounders: 
 We further note several additional difference between the enforcers and the non-enforcer groups that were not considered in the @Popkin2023.  As an example, the number of average number of goals scores between the two groups significantly different for both definitions of enforcers.  The average number of goals scores for E-F enforcers  vs non-enforcers was `r summ$mngoals[summ$EF]` vs `r summ$mngoals[!summ$EF]` (p-value: `r ifelse(round(t.test(dat$G~dat$EF)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$G~dat$EF)$p.value,2))`).  For E-P enforcers, the average number of goals for enforcers was `r summEP$mngoals[summEP$EP]` vs `r summEP$mngoals[!summEP$EP]` (p-value: `r ifelse(round(t.test(dat$G~dat$EP)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$G~dat$EP)$p.value,2))`).  
