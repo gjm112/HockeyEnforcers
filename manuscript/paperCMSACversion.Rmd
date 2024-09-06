@@ -1,14 +1,14 @@
 ---
 title: |
-  |  \large Assessing the Impact: A Survival (Re)Analysis of Hockey Enforcers vs. Non-Enforcers
+  |  \Huge Assessing the Impact: A Survival (Re)Analysis of Hockey Enforcers vs. Non-Enforcers
 author: | 
 abstract: |
- | A recent study looked at the relationship between long-term mortality and being an enforcer in the National Hockey League between 1967 and 2022.  They performed a matched cohort study that found no significant difference in the mortality rates of enforcers versus non-enforcers (where “enforcer” is defined based on number of career fights or average career penalty minutes).  They then perform an additional sub-analysis conditioning on players that were currently deceased and looking at just this subset of players, they find a significant difference in the mean age at death between the enforcers and non-enforcers groups (45.2 vs 55.2; p-value= 0.02) thus reaching the conclusion that enforcers died an average of 10 years earlier than non-enforcers. However, some of the statistical methods used to reach their conclusions were unconvincing, specifically the approach used to reach this last claim.  Therefore, we undertook a re-analysis of their study using a survival analysis approach, which we believe is the natural method to use to study this question.  In addition, we augmented their data by scraping hockey-reference to find more instances of players who were deceased.  Then, using a Cox proportional hazards model, we found no significant difference in survival rate between enforcers and non-enforcers when an enforcer was defined based on the number of career fights.  However, when an enforcer was defined by average career penalty minutes, a significant difference was observed, which was notably not found in the original article.  Specifically, we find an estimated hazard ratio of enforcers to non-enforcers of 2.29 (p-value: 0.00169).  Therefore, we agree with the sentiment of the original paper that there is some difference between survival of these two groups, but we believe our approach to estimating this effect is more appropriate and that the magnitude of the effect in the original article is overstated.
+ | A recent study looked at the relationship between long-term mortality and being an enforcer in the National Hockey League between 1967 and 2022.  They performed a matched cohort study that found no significant difference in the mortality rates of enforcers versus non-enforcers (where “enforcer” is defined based on number of career fights or average career penalty minutes).  They then perform an additional sub-analysis conditioning on players that were currently deceased and looking at just this subset of players, they find a significant difference in the mean age at death between the enforcers and non-enforcers groups (45.2 vs 55.2; p-value= 0.02) thus reaching the conclusion that enforcers died an average of 10 years earlier than non-enforcers. However, some of the statistical methods used to reach their conclusions were unconvincing, specifically the approach used to reach this last claim.  Therefore, we undertook a re-analysis of their study using a survival analysis approach, which we believe is the natural method to use to study this question.  In addition, we augmented their data by scraping hockey-reference to find more instances of players who were deceased.  Then, using a Cox proportional hazards model, we found no significant difference in survival rate between enforcers and non-enforcers when an enforcer was defined based on the number of career fights.  However, when an enforcer was defined by average career penalty minutes, a significant difference was observed, which was notably not found in the original article.  Specifically, we find an estimated hazard ratio of enforcers to non-enforcers of 2.35 (p-value: 0.00125).  Therefore, we agree with the sentiment of the original paper that there is some difference between survival of these two groups, but we believe our approach to estimating this effect is more appropriate and that the magnitude of the effect in the original article is overstated.
  \vspace{2mm} 
-  |
- Keywords: survival analysis, hockey
+ <!--  | -->
+ <!-- Keywords: survival analysis, relative mortality rates, hockey, fighting, head injury -->
 bibliography: references.bib
-fontsize: 10pt
+fontsize: 11pt
 link-citations: true
 linkcolor: cyan
 urlcolor: cyan
@@ -370,7 +370,7 @@ In this same set of players, on average, enforcers in this data set tended to be
 \begin{center}
 \begin{tabular}{|c|c|c|c|}
 \hline
- Variable & EF = TRUE & EF = FALSE & p-value \\
+ Variable & Enforcers & Non-Enforcers & p-value \\
  \hline
  n & `r summ$n[summ$EF]` & `r summ$n[!summ$EF]` & \\
  Games Played & `r summ$mnGP[summ$EF]` (`r summ$seGP[summ$EF]`) & `r summ$mnGP[!summ$EF]` (`r summ$seGP[!summ$EF]`) & `r ifelse(round(t.test(dat$GP.x~dat$EF)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$GP.x~dat$EF)$p.value,2))`\\
@@ -392,7 +392,7 @@ In this same set of players, on average, enforcers in this data set tended to be
 \begin{center}
 \begin{tabular}{|c|c|c|c|}
 \hline
- Variable & EP = TRUE & EP = FALSE & p-value \\
+ Variable & Enforcers & Non-Enforcers & p-value \\
  \hline
  n & `r summEP$n[summEP$EP]` & `r summEP$n[!summEP$EP]` & \\
  Games Played & `r summEP$mnGP[summEP$EP]` (`r summEP$seGP[summEP$EP]`) & `r summEP$mnGP[!summEP$EP]` (`r summEP$seGP[!summEP$EP]`) & `r ifelse(round(t.test(dat$GP.x~dat$EP)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$GP.x~dat$EP)$p.value,2))`\\
@@ -590,7 +590,7 @@ xtable(summary(a)$coef)
 
 
 # Results {#sec:results}
-Table \ref{tab:EF} shows the results for the Cox proportional hazards model when enforcers were defined based on their number of career fights.  No statistically significant difference was observed in the hazard functions of enforcers versus non-enforcers (p-value = 0.48977). However, a significant difference is observed between enforcers and non-enforcers when the enforcer is defined based on their number of penalty minutes per game (p-value = 0.00125).  The estimated hazard ratio for E-P is 2.34988, indicating a 135\% increase in the hazard for enforcers vs non-enforcers when all other variables are held constant.  
+Table \ref{tab:EF} shows the results for the Cox proportional hazards model when enforcers were defined based on their number of career fights.  No statistically significant difference was observed in the hazard functions of enforcers versus non-enforcers (p-value = 0.490). However, a significant difference is observed between enforcers and non-enforcers when the enforcer is defined based on their number of penalty minutes per game (p-value = 0.00125).  The estimated hazard ratio for E-P is 2.35, indicating a 135\% increase in the hazard for enforcers vs non-enforcers when all other variables are held constant.  
 
 <!-- These numbers need to be recomputed -->
 Figure \ref{fig:estsurv} shows the estimated survival curves for enforcers (E-P) versus non-enforcers for defenders with all continuous variables held constant at mean levels.  Using this, the estimated survival rate at the age of 50 for enforcers vs non-enforcers is 96.45\% (95\% CI: 94.44\%, 98.51\%) vs 98.47\% (95\% CI: 97.96\%, 98.99\%).  For the same conditions at the age of 75, the estimated survival rate for enforcers is about 74.01\% (95\% CI: 60.78\%, 90.23\%) compared to non-enforcers estimate survival rate of 88.00\% (95\% CI: 83.11\%, 93.18\%).  The estimated survival rate for enforcers drops an additional `r (96.45-74.01)-(98.47 - 88.00)`\% between the ages of 50 and 75 versus non-enforcers.
@@ -651,17 +651,17 @@ precnclsn_sum = jama_short %>%
 <!-- % Sep 4  2024 -->
 \begin{table}[ht]
 \centering
-\begin{tabular}{rrrrr}
+\begin{tabular}{|c|c|c|c|c|}
   \hline
- & $\beta$ & $e^{\beta}$ & s.e. & p-value \\ 
+Covariate  & $\beta$ & $e^{\beta}$ & s.e. & p-value \\ 
   \hline
-  EFTRUE & 0.19994 & 1.22132 & 0.28948 & 0.48977 \\ 
-  GP.x & -0.00061 & 0.99939 & 0.00023 & 0.00675 \\ 
-  Ht & -0.03414 & 0.96644 & 0.04465 & 0.44455 \\ 
-  Wt & 0.02134 & 1.02157 & 0.00658 & 0.00118 \\ 
-  DOB.Year & -0.01691 & 0.98323 & 0.00825 & 0.04047 \\ 
-  Pos2D & -0.38403 & 0.68111 & 0.17532 & 0.02849 \\ 
-  Pos2W & -0.28394 & 0.75281 & 0.15967 & 0.07536 \\ 
+  $I_{\text{E-F}}$ & 0.200 & 1.221 & 0.289 & 0.490 \\ 
+  GP & -0.00061 & 0.999 & 0.00023 & 0.00675 \\ 
+  Ht & -0.0341 & 0.966 & 0.045 & 0.445 \\ 
+  Wt  & 0.0213 & 1.0216 & 0.00658 & 0.00118 \\ 
+  DOB & -0.0169 & 0.983 & 0.00825 & 0.0405 \\ 
+  $I_{\text{Defense}}$ & -0.384 & 0.681 & 0.175 & 0.028 \\ 
+  $I_{\text{Wing}}$ & -0.284 & 0.753 & 0.160 & 0.075 \\ 
    \hline
 \end{tabular}
 \caption{Cox Proportional Hazards Model Output Comparing Enforcer to Non-Enforcer when Enforcer is Defined by Career Fights (E-F) and Controlling for Games
@@ -675,22 +675,20 @@ Played (GP), Height (Ht), Weight (Wt), Year of Birth (DOB), and Position Indicat
 <!-- % Mon Feb 26 09:04:35 2024 -->
 \begin{table}[ht]
 \centering
-\begin{tabular}{rrrrr}
+\begin{tabular}{|c|c|c|c|c|}
   \hline
- & $\beta$ & $e^{\beta}$ & s.e. & p-value \\ 
+ Covariate & $\beta$ & $e^{\beta}$ & s.e. & p-value \\ 
   \hline
-EPTRUE & 0.85436 & 2.34988 & 0.26474 & 0.00125 \\ 
-  GP.x & -0.00052 & 0.99948 & 0.00022 & 0.01587 \\ 
-  Ht & -0.02783 & 0.97255 & 0.04439 & 0.53069 \\ 
-  Wt & 0.01859 & 1.01877 & 0.00659 & 0.00480 \\ 
-  DOB.Year & -0.01699 & 0.98316 & 0.00831 & 0.04102 \\ 
-  $I_D$ & -0.38847 & 0.67810 & 0.17549 & 0.02686 \\ 
-  $I_W$ & -0.31332 & 0.73102 & 0.16048 & 0.05089 \\ 
-   \hline
+$I_{\text{E-P}}$ & 0.854 & 2.350 & 0.265 & 0.00125 \\ 
+  GP & -0.00052 & 0.999 & 0.00022 & 0.0159 \\ 
+  Ht & -0.0278 & 0.973 & 0.0444 & 0.531 \\ 
+  Wt & 0.0186 & 1.0188 & 0.00659 & 0.00480 \\ 
+  DOB & -0.0170 & 0.983 & 0.00831 & 0.0410 \\ 
+  $I_{\text{Defense}}$ & -0.388 & 0.678 & 0.175 & 0.0269 \\ 
+  $I_{\text{Wing}}$ & -0.313 & 0.731 & 0.160 & 0.0509 \\ 
    \hline
 \end{tabular}
-\caption{Cox Proportional Hazards Model Output Comparing Enforcer to Non-Enforcer when Enforcer is Defined by Penalty Minutes (E-P) and Controlling for Games
-Played (GP), Height (Ht), Weight (Wt), Year of Birth (DOB), and Position Indicators \label{tab:EP}}
+\caption{Cox Proportional Hazards Model Output Comparing Enforcer to Non-Enforcer when Enforcer is Defined by Penalty Minutes (E-P) and Controlling for Games Played (GP), Height (Ht), Weight (Wt), Year of Birth (DOB), and Position Indicators \label{tab:EP}}
 \end{table}
 
 
@@ -730,7 +728,7 @@ ggdat <- data.frame(enforcer = c(rep("Enforcer",nnn),rep("Non-Enforcer",nnn)),
 ),
 time = rep(survfit(coxphmod_EP, newdata = newdataEP)$time,2)
 )
-ggplot(aes(x = time,y = surv, color = enforcer), data = ggdat) + geom_path() + geom_path(aes(x = time,y = lower, color = enforcer), lty = 3) + geom_path(aes(x = time,y = upper, color = enforcer), lty = 3) 
+ggplot(aes(x = time,y = surv, color = enforcer), data = ggdat) + geom_path() + geom_path(aes(x = time,y = lower, color = enforcer), lty = 3) + geom_path(aes(x = time,y = upper, color = enforcer), lty = 3) + ylab("Overall Survival Probability") + labs(color = NULL)
 
 #Survival rates are age 50. 
 #ggdat %>% filter(time == 50)
@@ -763,29 +761,26 @@ efcountry <- dat %>% mutate(northamerica = ifelse(Ctry %in% c("USA","CAN"),"Nort
 # Conclusion {#sec:conclusion}
 @Popkin2023 presented work looking for differences in mortality rates between NHL enforcers and non-enforcers who played between 1967 and 2022 where they defined enforcers in two ways: one based on the number of career fights and the other based on the average career penalty minutes per game.  They performed a matched-cohort study matching on date of birth, total number of games played, height, weight, and position.  They conclude there there is no statistically significant difference in the mortality rates for either definition of enforcer.  They then go on to perform an additional analysis where they condition on death and show that of players in their matched data set who are deceased, enforcers died an average of about 10 years earlier than their non-enforcer counterparts.  
 
-While we found this work to be of interest, we believe that a more appropriate statistical framework for this analysis is survival analysis.  Therefore, we performed our own extended analysis with additional data using methods from survival analysis to estimate difference survival times between enforcers and non-enforcers.  For enforcers, defined based on number of career fights we find no significant difference in survival times.  Conversely, we do find a significant difference in survival times for enforcers defined based on average penalty minutes per game.  Specifically, we find that enforcers defined in this way have a hazard ratio of 2.34988 (p-value: 0.00125) relative to non-enforcers indicated that there are significant risks associated with the position of enforcer.  
+While we found this work to be of interest, we believe that a more appropriate statistical framework for this analysis is survival analysis.  Therefore, we performed our own extended analysis with additional data using methods from survival analysis to estimate difference survival times between enforcers and non-enforcers.  For enforcers, defined based on number of career fights we find no significant difference in survival times.  Conversely, we do find a significant difference in survival times for enforcers defined based on average penalty minutes per game.  Specifically, we find that enforcers defined in this way have a hazard ratio of 2.35 (p-value: 0.00125) relative to non-enforcers indicated that there are significant risks associated with the position of enforcer.  
+
 While we find this clear association between enforcers and increased hazard by controlling for the variables that were matched on in @Popkin2023, there are several obvious uncontrolled variables that have substantially different distributions in the enforcer and non-enforcer populations.  One simple example are the differences in average number of goals scores between the two groups significantly different for both definitions of enforcers.  The average number of goals scores for E-F enforcers  vs non-enforcers was `r summ$mngoals[summ$EF]` vs `r summ$mngoals[!summ$EF]` (p-value: `r ifelse(round(t.test(dat$G~dat$EF)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$G~dat$EF)$p.value,2))`).  For E-P enforcers, the average number of goals for enforcers was `r summEP$mngoals[summEP$EP]` vs `r summEP$mngoals[!summEP$EP]` (p-value: `r ifelse(round(t.test(dat$G~dat$EP)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$G~dat$EP)$p.value,2))`).  
 
-Perhaps more interestingly, we find highly significant differences in geographic region of enforcers vs non-enforcers for both definitions.  In the enforcer group `r paste0(100*round(efcountry$p[efcountry$EF],4),"\\%")` and `r paste0(100*round(epcountry$p[epcountry$EP],4),"\\%")` of those groups are from North America (i.e. United States or Canada) for E-F and E-P, respectively.  For non-enforcers, North American players make up only `r paste0(100*round(efcountry$p[!efcountry$EF],4),"\\%")` for E-F and `r paste0(100*round(epcountry$p[!epcountry$EP],4),"\\%")` for E-P.  For both definitions of enforcer, these differences are significant with p-values for both definitions less than 0.0001.  While we do not address this imbalance here, as we focus on closely following the work of @Popkin2023, it is worth noting this imbalance in geographic origin (i.e. North American vs outside of North America) of enforcers versus non-enforcer, and we leave the exploration of this issue for future work.   
+Perhaps more interestingly, we find highly significant differences in geographic region of enforcers vs non-enforcers for both definitions.  In the enforcer group `r paste0(100*round(efcountry$p[efcountry$EF],4),"\\%")` and `r paste0(100*round(epcountry$p[epcountry$EP],4),"\\%")` of those groups are from North America (i.e. United States or Canada) for E-F and E-P, respectively.  For non-enforcers, North American players make up only `r paste0(100*round(efcountry$p[!efcountry$EF],4),"\\%")` for E-F and `r paste0(100*round(epcountry$p[!epcountry$EP],4),"\\%")` for E-P.  For both definitions of enforcer, these differences are significant with p-values for both definitions less than 0.0001.  While we do not address this imbalance here, as we focus on closely following the work of @Popkin2023, it is worth noting this imbalance in geographic origin (i.e. North American vs outside of North America) of enforcers versus non-enforcer, and we leave the exploration of this issue for future work.  
 
+Finally, while our finding that there is an association between increased hazard and enforcers defined by penalty minutes, we note that this is a rather arbitrary definition of enforcer.  We hypothesize that the effect is not actually driven by the "enforcer" category, but simple by an increase in penalty minutes.  We posit that a higher average number of penalty minutes is associated with more general contact, including but not limited to fighting.  Further, these contacts in hockey are often at high speeds due the the nature of the game (i.e. the players are on skates).  We leave this proposal as future work, but even without exploring this avenue, we believe this work adds to the body of literature relating contact in sports and a reduction in life spans.  
 
  <!-- including date of birth, total number of games played, height, weight, and position played. -->
 
 <!-- Talk about continuous penality minutes stuff? -->
 
-
-
-
-
-
-
 # Acknowledgements {-}
 
-We would like to thank @Popkin2023 for their generosity and willingness to share the data provided for the above analysis.
+We would like to thank the authors of @Popkin2023 for their generosity and willingness to share the data provided for the above analysis.
 
 
-# Supplementary Material {-}
-
+<!-- # Supplementary Material {-} -->
 <!-- All code for reproducing the analyses in this paper is publicly available at https://github.com/gjm112/HockeyEnforcers -->
+
+
 
 # References
