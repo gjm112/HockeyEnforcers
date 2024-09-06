@@ -221,15 +221,15 @@ The use of violence to enforce social norms in the sport, of course, also has th
 
 <!-- The question is, should the game continue to move away from contact-driven strategy in favor of younger, faster, highly-skilled players? -->
 
-```{r enforcer_density, echo = FALSE, fig.cap='Density Plot of Study Cohorts by DOB'}
+```{r enforcer_density, echo = FALSE, fig.cap='Proportion of Enforcer-Status Players to All Players by Date of Birth'}
 #Note: I think the blue should be labeled as total players because it's stacked 
 cohort_dat = dat %>% mutate(cohort = case_when(PIM.GP > 3 ~ 'Enforcer',
                                   #Total.Fights > 50 ~ 'Enforcer',
-                                  .default = 'Non-Enforcer')) 
+                                  .default = 'All Players')) 
 
 cohort_dat$cohort = as.factor(cohort_dat$cohort)
 
-cohort_dat$cohort <- factor(cohort_dat$cohort, levels = c('Non-Enforcer', 'Enforcer'))
+cohort_dat$cohort <- factor(cohort_dat$cohort, levels = c('All Players', 'Enforcer'))
 
 #ggplot(cohort_dat, aes(x = DOB)) + geom_density(aes(fill = cohort),alpha = 0.75 )
 
@@ -359,7 +359,7 @@ In this same set of players, on average, enforcers in this data set tended to be
  \hline
 \end{tabular}
 \end{center}
-\caption{Overall summary stats
+\caption{Descriptive Summary of All Hockey Players who Started after 1967 and Played at Least One Game Between the 1967-68 and 2022-2023 NHL seasons
 \label{tab:EDAoverall}}
 \end{table}
 
@@ -384,7 +384,7 @@ In this same set of players, on average, enforcers in this data set tended to be
  \hline
 \end{tabular}
 \end{center}
-\caption{Comparing enforcers to non-enforcers when enforcer is defined as E-F \label{tab:EDAEF}}
+\caption{Comparison of Enforcers to Non-Enforcers when Enforcer is Defined by Career Fights (E-F) \label{tab:EDAEF}}
 \end{table}
 
 
@@ -406,7 +406,7 @@ In this same set of players, on average, enforcers in this data set tended to be
 \end{tabular}
 \end{center}
 
-\caption{Comparing enforcers to non-enforcers when enforcer is defined as E-P \label{tab:EDAEP}}
+\caption{Comparison of Enforcers to Non-Enforcers when Enforcer is Defined by Penalty Minutes (E-P) \label{tab:EDAEP}}
 \end{table}
 
 
@@ -430,7 +430,7 @@ dat$Pos2[dat$Pos2 %in% c("L","R")] <- "W"
 dat$Pos2 <- factor(dat$Pos2)
 ```
 
-```{r KMEF, echo = FALSE, fig.cap="Kaplan Meier plot for E-F" }
+```{r KMEF, echo = FALSE, fig.cap="Kaplan Meier Plot Comparing Survival Rates of Enforcers to Non-Enforcers when Enforcer is Defined by Career Fights (E-F)" }
 library(ggsurvfit)
 survfit2(Surv ~ EFchar, data = dat) %>%
   ggsurvfit() +
@@ -441,7 +441,7 @@ survfit2(Surv ~ EFchar, data = dat) %>%
   add_confidence_interval()
 ```
 
-```{r KMEP, echo = FALSE, fig.cap="Kaplan Meier plot for E-P" }
+```{r KMEP, echo = FALSE, fig.cap="Kaplan Meier Plot Comparing Survival Rates of Enforcers to Non-Enforcers when Enforcer is Defined by Penalty Minutes (E-P)" }
 library(ggsurvfit)
 survfit2(Surv ~ EPchar, data = dat) %>% 
   ggsurvfit() +
@@ -664,7 +664,8 @@ precnclsn_sum = jama_short %>%
   Pos2W & -0.28394 & 0.75281 & 0.15967 & 0.07536 \\ 
    \hline
 \end{tabular}
-\caption{E-F \label{tab:EF}}
+\caption{Cox Proportional Hazards Model Output Comparing Enforcer to Non-Enforcer when Enforcer is Defined by Career Fights (E-F) and Controlling for Games
+Played (GP), Height (Ht), Weight (Wt), Year of Birth (DOB), and Position Indicators \label{tab:EF}}
 \end{table}
 
 
@@ -688,7 +689,8 @@ EPTRUE & 0.85436 & 2.34988 & 0.26474 & 0.00125 \\
    \hline
    \hline
 \end{tabular}
-\caption{E-P \label{tab:EP}}
+\caption{Cox Proportional Hazards Model Output Comparing Enforcer to Non-Enforcer when Enforcer is Defined by Penalty Minutes (E-P) and Controlling for Games
+Played (GP), Height (Ht), Weight (Wt), Year of Birth (DOB), and Position Indicators \label{tab:EP}}
 \end{table}
 
 
