@@ -477,6 +477,8 @@ The analysis presented here utilizes all hockey players in the data, both alive 
 
 Figures \ref{fig:KMEF} and \ref{fig:KMEP} show Kaplan-Meier plots for EF and EP.  There is substantial overlap in the K-M curves between the enforcer and non-enforcers groups when enforcers is defined using the EF criteria. However, the enforcer group defined by the EP criteria exhibits evidence of lower survival probabilities starting around age 50 relative to the non-enforcer group. Nevertheless, it is important to remember that these two groups differ substantially in age, height, and weight that may lead both to increased probability of becoming an enforcer and an increased probability in early death.
 
+We note here that figure \ref{fig:KMEP} demonstrates clearly why mortality rate is often not an appropriate measure for comparing risk between groups.  If one were to look only at mortality rates at age 75, the mortality rates among these two groups are nearly identical (just under 20\%).  However, the enforcers survival curve is clearly below the non-enforcer survival curve estimate at almost every point below 75 indicating that enforcers are dying at younger ages on average even though the mortality rate eventually becomes nearly indistinguishable near the age of 75.  All of this is, by the way, exactly consistent with the findings of @Popkin2023 (i.e. no signficant difference in mortality rates, but enforcers dying at younger ages).  
+
 In order to account for these differences between the groups, we estimated full Cox proportional hazard models @CoxPH: one for each definition of enforcer defined in @Popkin2023 (i.e. E-F and E-P) with time until death as the outcome variable. Further, the indicators for each definition of enforcer, games played (GP), height (Ht), weight (Wt), year of birth (DOB), and position indicators (Center (C), Wing (W), or Defender (D)) were added as control variables.
 
 All analysis was performed in R version 4.4.0 @R using the survival library @survival-book.  
@@ -737,20 +739,6 @@ ggplot(aes(x = time,y = surv, color = enforcer), data = ggdat) + geom_path() + g
 
 Age difference statement in Popkin is over stated.  -->
 
-# Conclusion {#sec:conclusion}
-@Popkin2023 presented work looking for differences in mortality rates between NHL enforcers and non-enforcers who played between 1967 and 2022 where they defined enforcers in two ways: one based on the number of career fights and the other based on the average career penalty minutes per game.  They performed a matched-cohort study matching on date of birth, total number of games played, height, weight, and position.  They conclude there there is no statistically significant difference in the mortality rates for either definition of enforcer.  They then go on to perform an additional analysis where they condition on death and show that of players in their matched data set who are deceased, enforcers died an average of about 10 years earlier than their non-enforcer counterparts.  
-
-While we found this work to be of interest, we believe that a more appropriate statistical framework for this analysis is survival analysis.  Therefore, we performed our own extended analysis with additional data using methods from survival analysis to estimate difference survival times between enforcers and non-enforcers.  For enforcers, defined based on number of career fights we find no significant difference in survival times.  Conversely, we do find a significant difference in survival times for enforcers defined based on average penalty minutes per game.  Specifically, we find that enforcers defined in this way have a hazard ratio of 2.34988
-
-
- <!-- including date of birth, total number of games played, height, weight, and position played. -->
-
-<!-- Talk about continuous penality minutes stuff? -->
-
-Unobserved Confounders: 
-We further note several additional difference between the enforcers and the non-enforcer groups that were not considered in the @Popkin2023.  As an example, the number of average number of goals scores between the two groups significantly different for both definitions of enforcers.  The average number of goals scores for E-F enforcers  vs non-enforcers was `r summ$mngoals[summ$EF]` vs `r summ$mngoals[!summ$EF]` (p-value: `r ifelse(round(t.test(dat$G~dat$EF)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$G~dat$EF)$p.value,2))`).  For E-P enforcers, the average number of goals for enforcers was `r summEP$mngoals[summEP$EP]` vs `r summEP$mngoals[!summEP$EP]` (p-value: `r ifelse(round(t.test(dat$G~dat$EP)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$G~dat$EP)$p.value,2))`).  
-
-
 ```{r echo = FALSE}
 #Enforcer by country
 epcountry <- dat %>% mutate(northamerica = ifelse(Ctry %in% c("USA","CAN"),"North America","Other")) %>% group_by(EP, northamerica) %>% summarize(n = n()) %>% pivot_wider(names_from = northamerica, values_from = n) %>% mutate(p = `North America`/(`North America`+ Other))
@@ -769,9 +757,23 @@ efcountry <- dat %>% mutate(northamerica = ifelse(Ctry %in% c("USA","CAN"),"Nort
 
 ```
 
-Perhaps more interestingly, we find highly significant differences in geographic region of enforcers vs non-enforcers for both definitions.  In the enforcer group `r paste0(100*round(efcountry$p[efcountry$EF],4),"\\%")` and `r paste0(100*round(epcountry$p[epcountry$EP],4),"\\%")` of those groups are from North America (i.e. United States or Canada) for E-F and E-P, respectively.  For non-enforcers, North American players make up only `r paste0(100*round(efcountry$p[!efcountry$EF],4),"\\%")` for E-F and `r paste0(100*round(epcountry$p[!epcountry$EP],4),"\\%")` for E-P.  For both definitions of enforcer, these differences are significant with p-values for both definitions less than 0.0001.   
 
-While we do not address this imbalance here, as we focus on closely following the work of @Popkin2023, it is worth noting the substantial imbalance in geographic origin (i.e. North American vs outside of North America) of enforcers versus non-enforcer.
+# Conclusion {#sec:conclusion}
+@Popkin2023 presented work looking for differences in mortality rates between NHL enforcers and non-enforcers who played between 1967 and 2022 where they defined enforcers in two ways: one based on the number of career fights and the other based on the average career penalty minutes per game.  They performed a matched-cohort study matching on date of birth, total number of games played, height, weight, and position.  They conclude there there is no statistically significant difference in the mortality rates for either definition of enforcer.  They then go on to perform an additional analysis where they condition on death and show that of players in their matched data set who are deceased, enforcers died an average of about 10 years earlier than their non-enforcer counterparts.  
+
+While we found this work to be of interest, we believe that a more appropriate statistical framework for this analysis is survival analysis.  Therefore, we performed our own extended analysis with additional data using methods from survival analysis to estimate difference survival times between enforcers and non-enforcers.  For enforcers, defined based on number of career fights we find no significant difference in survival times.  Conversely, we do find a significant difference in survival times for enforcers defined based on average penalty minutes per game.  Specifically, we find that enforcers defined in this way have a hazard ratio of 2.34988 (p-value: 0.00125) relative to non-enforcers indicated that there are significant risks associated with the position of enforcer.  
+While we find this clear association between enforcers and increased hazard by controlling for the variables that were matched on in @Popkin2023, there are several obvious uncontrolled variables that have substantially different distributions in the enforcer and non-enforcer populations.  One simple example are the differences in average number of goals scores between the two groups significantly different for both definitions of enforcers.  The average number of goals scores for E-F enforcers  vs non-enforcers was `r summ$mngoals[summ$EF]` vs `r summ$mngoals[!summ$EF]` (p-value: `r ifelse(round(t.test(dat$G~dat$EF)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$G~dat$EF)$p.value,2))`).  For E-P enforcers, the average number of goals for enforcers was `r summEP$mngoals[summEP$EP]` vs `r summEP$mngoals[!summEP$EP]` (p-value: `r ifelse(round(t.test(dat$G~dat$EP)$p.value,2) <0.0001,"<0.0001",round(t.test(dat$G~dat$EP)$p.value,2))`).  
+
+Perhaps more interestingly, we find highly significant differences in geographic region of enforcers vs non-enforcers for both definitions.  In the enforcer group `r paste0(100*round(efcountry$p[efcountry$EF],4),"\\%")` and `r paste0(100*round(epcountry$p[epcountry$EP],4),"\\%")` of those groups are from North America (i.e. United States or Canada) for E-F and E-P, respectively.  For non-enforcers, North American players make up only `r paste0(100*round(efcountry$p[!efcountry$EF],4),"\\%")` for E-F and `r paste0(100*round(epcountry$p[!epcountry$EP],4),"\\%")` for E-P.  For both definitions of enforcer, these differences are significant with p-values for both definitions less than 0.0001.  While we do not address this imbalance here, as we focus on closely following the work of @Popkin2023, it is worth noting this imbalance in geographic origin (i.e. North American vs outside of North America) of enforcers versus non-enforcer, and we leave the exploration of this issue for future work.   
+
+
+ <!-- including date of birth, total number of games played, height, weight, and position played. -->
+
+<!-- Talk about continuous penality minutes stuff? -->
+
+
+
+
 
 
 
