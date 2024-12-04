@@ -357,6 +357,9 @@ survfit2(Surv ~ EPchar, data = dat) %>%
 
 Figures \ref{fig:KMEF} and \ref{fig:KMEP} show Kaplan-Meier plots for EF and EP.  Whiel there is a substantial amount of overlap between the K-M curves between the enforcer and non-enforcers groups when enforcers is defined using the EF criteria, the enforcer group when defined by the EP criteria shows lower survival probabilities starting around age 50 relative to the non-enforcer group.  Though it is important to remember that these two groups differ substantially in age, height, and weight.
 
+
+
+
 # Methods {#sec:methods}
 Rather than focusing on mortality rates, as in @popkin2023, instead the focus here is to perform a re-analysis of the original study using survival analysis techniques, specifically Cox proportional hazards models, to look for differences in survival times of enforcers versus non-enforcers.  [[Why do we think survival analysis is the correct choice for analyzing this data.  Explain.  ]]
 
@@ -468,9 +471,131 @@ ggplot(aes(x = time,y = surv, color = enforcer), data = ggdat) + geom_path() + g
 
 ```
 
+
 Talk about the conditioning on death stuff.  
 
 Age difference statement in Popkin is over stated.  
+
+
+## Continuous predictors for fights and penalty minutes
+```{r}
+dat <- dat %>% mutate(northamerica = ifelse(Ctry %in% c("USA","CAN"),"North America","Other"))
+
+ggplot(aes(x = northamerica, y = PIM.GP_numeric), data = dat) + geom_boxplot()
+
+ggplot(aes(x = northamerica, y = Total.Fights), data = dat) + geom_boxplot()
+
+ggplot(aes(color = northamerica,x = PIM.GP_numeric, y = Total.Fights), data = dat) + geom_point() + facet_grid(~northamerica)
+```
+
+
+
+```{r fig:estsurv, echo = FALSE, fig.cap = "Estimated Survival curve for EP for defenders.  All other variables are fixed at their mean level (GP = 285.8, Ht = 72.7in, Wt = 197.03, and Year of birth 1974.5."}
+dat <- dat %>% mutate(northamerica = ifelse(Ctry %in% c("USA","CAN"),"North America","Other"))
+coxphmod_PIM.GP_numeric <- coxph(Surv ~ PIM.GP_numeric + GP.x + Ht + Wt + DOB.Year + Pos2, data = dat)
+coxphmod_PIM.GP_numeric
+```
+
+Mike Lopez suggested looking at North America vs playuers from outside of North America.  
+Controlling for North America vs Other penalty minutes, penalty minutes per game is significant wuth a hazard ratio of 1.1880411. 
+```{r}
+coxphmod_PIM.GP_numeric <- coxph(Surv ~ PIM.GP_numeric + northamerica + GP.x + Ht + Wt + DOB.Year + Pos2, data = dat)
+coxphmod_PIM.GP_numeric
+```
+
+
+
+```{r}
+# summary(coxphmod_EP)
+# library(xtable)
+# xtable(summary(coxphmod_EP)$coef[,-4],digits = 5)
+# cox.zph(coxphmod_EP)
+
+
+newdataEP <-
+  with(dat, data.frame(PIM.GP_numeric = c(0.25,.5,3),
+                       northamerica = rep("North America",3),
+                       GP.x = rep(mean(GP.x), 3),
+                       Ht = rep(mean(Ht), 3),
+                       Wt = rep(mean(Wt), 3),
+                       DOB.Year = rep(mean(DOB.Year), 3),
+                       Pos2 = rep("D", 3))
+                       )
+#plot(survfit(coxphmod_EP, newdata = newdataEP), conf.int = TRUE, lty = c(1,2))
+
+
+nnn <- nrow(survfit(coxphmod_PIM.GP_numeric, newdata = newdataEP)$surv)
+ggdat <- data.frame(PIM.GP_numeric = c(rep(c(.5,3),each = nnn)),
+  surv = c(
+  survfit(coxphmod_PIM.GP_numeric, newdata = newdataEP)$surv[, 1],
+  survfit(coxphmod_PIM.GP_numeric, newdata = newdataEP)$surv[, 2]
+),
+  lower = c(
+  survfit(coxphmod_PIM.GP_numeric, newdata = newdataEP)$lower[, 1],
+  survfit(coxphmod_PIM.GP_numeric, newdata = newdataEP)$lower[, 2]
+),
+  upper = c(
+  survfit(coxphmod_PIM.GP_numeric, newdata = newdataEP)$upper[, 1],
+  survfit(coxphmod_PIM.GP_numeric, newdata = newdataEP)$upper[, 2]
+),
+time = rep(survfit(coxphmod_PIM.GP_numeric, newdata = newdataEP)$time,2)
+)
+ggplot(aes(x = time,y = surv, color = as.factor(PIM.GP_numeric)), data = ggdat) + geom_path() + geom_path(aes(x = time,y = lower, color = as.factor(PIM.GP_numeric)), lty = 3) + geom_path(aes(x = time,y = upper, color = as.factor(PIM.GP_numeric)), lty = 3) 
+```
+
+
+```{r fig:estsurv, echo = FALSE, fig.cap = "Estimated Survival curve for EF for defenders.  All other variables are fixed at their mean level (GP = 285.8, Ht = 72.7in, Wt = 197.03, and Year of birth 1974.5."}
+coxphmod_Total.Fights <- coxph(Surv ~ Total.Fights + northamerica + GP.x + Ht + Wt + DOB.Year + Pos2, data = dat)
+# summary(coxphmod_EP)
+# library(xtable)
+# xtable(summary(coxphmod_EP)$coef[,-4],digits = 5)
+# cox.zph(coxphmod_EP)
+
+
+newdataEF <-
+  with(dat, data.frame(Total.Fights = c(0,1,7),
+                       GP.x = rep(mean(GP.x), 3),
+                       Ht = rep(mean(Ht), 3),
+                       Wt = rep(mean(Wt), 3),
+                       DOB.Year = rep(mean(DOB.Year), 3),
+                       Pos2 = rep("D", 3))
+                       )
+#plot(survfit(coxphmod_EP, newdata = newdataEP), conf.int = TRUE, lty = c(1,2))
+
+
+nnn <- nrow(survfit(coxphmod_Total.Fights, newdata = newdataEF)$surv)
+ggdat <- data.frame(Total.Fights = c(rep(c(0,5,50),each = nnn)),
+  surv = c(
+  survfit(coxphmod_Total.Fights, newdata = newdataEF)$surv[, 1],
+  survfit(coxphmod_Total.Fights, newdata = newdataEF)$surv[, 2],
+  survfit(coxphmod_Total.Fights, newdata = newdataEF)$surv[, 3]
+),
+  lower = c(
+  survfit(coxphmod_Total.Fights, newdata = newdataEF)$lower[, 1],
+  survfit(coxphmod_Total.Fights, newdata = newdataEF)$lower[, 2],
+  survfit(coxphmod_Total.Fights, newdata = newdataEF)$lower[, 3]
+),
+  upper = c(
+  survfit(coxphmod_Total.Fights, newdata = newdataEF)$upper[, 1],
+  survfit(coxphmod_Total.Fights, newdata = newdataEF)$upper[, 2],
+  survfit(coxphmod_Total.Fights, newdata = newdataEF)$upper[, 3]
+),
+time = rep(survfit(coxphmod_Total.Fights, newdata = newdataEF)$time,3)
+)
+ggplot(aes(x = time,y = surv, color = as.factor(Total.Fights)), data = ggdat) + geom_path() + geom_path(aes(x = time,y = lower, color = as.factor(Total.Fights)), lty = 3) + geom_path(aes(x = time,y = upper, color = as.factor(Total.Fights)), lty = 3) 
+```
+
+
+## Birth country
+```{r}
+epcountry <- dat %>% mutate(northamerica = ifelse(Ctry %in% c("USA","CAN"),"North America","Other")) %>% group_by(EP, northamerica) %>% summarize(n = n()) %>% pivot_wider(names_from = northamerica, values_from = n) %>% mutate(p = `North America`/(`North America`+ Other))
+
+#prop.test(epcountry$`North America`,epcountry$Other+epcountry$`North America`)
+
+
+#Enforcer by country
+efcountry <- dat %>% mutate(northamerica = ifelse(Ctry %in% c("USA","CAN"),"North America","Other")) %>% group_by(EF, northamerica) %>% summarize(n = n()) %>% pivot_wider(names_from = northamerica, values_from = n)  %>% mutate(p = `North America`/(`North America`+ Other))
+```
 
 # Conclusion {#sec:conclusion}
 
