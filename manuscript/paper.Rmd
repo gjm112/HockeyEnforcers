@@ -371,11 +371,14 @@ Rather than focusing on mortality rates, as in @popkin2023, instead the focus he
 
 
 # Results {#sec:results}
+
+## E-F and E-P results 
+
 Two Cox proportional hazards models @CoxPH were fit: one for each definition of enforcer defined in @Popkin2023 (i.e. E-F and E-P) with time until death as the response variable.  In addition, to indicators for each definition of enforcer, games played (GP), height (Ht), weight (Wt), year of birth (DOB), and position (Center (C), Wing (W), or Defender(D)) were added to each model as control variables. 
 
 Table \ref{tab:EF} shows the results for the Cox model when enforcers were defined based on their number of career fights.  No statistically significant difference was observed in the hazard functions of enforcers versus non enforcers (p-value = 0.54856).  
 
-However, a significant difference is observed in between enforcers and non-enforcers when the enforcers is defined based on their number of penalty minutes per game (p-value = 0.00169).  The estimated effect for E-P is 0.83023.  When exponentiated, this value is 2.29385, indicating approximately a 129\% increase in the hazard for enforcers vs non-enforcers when all other variables are held constant.  Fixing the levels of the continuous predictors at their mean values and fixing position to be defender, the estimated survival rate at the age of 50 for enforcers is 96.57\% (95\% CI: 94.63\%, 98.56\%) vs 98.49\% (95\% CI: 97.98\%, 99.00\%).  For the same conditions at the age of 75, the estimated survival rate for enforcers is about 74.4\% (95\% CI: 61.4\%, 90.32\%) compared to non-enforcers estimate survival rate of 87.95\% (95\% CI: 83.09\%, 93.10\%).  
+However, a significant difference is observed between enforcers and non-enforcers when the enforcers is defined based on their number of penalty minutes per game (p-value = 0.00169).  Shown in table \ref{tab:EP}, the estimated effect for E-P is 0.83023 with a corresponding hazard ratio of 2.29385 (i.e. $e^0.83023$), indicating approximately a 129\% increase in the hazard for enforcers vs non-enforcers when all other variables are held constant.  Fixing the levels of the continuous predictors at their mean values and fixing position to be defender, the estimated survival rate at the age of 50 for enforcers is 96.57\% (95\% CI: 94.63\%, 98.56\%) vs 98.49\% (95\% CI: 97.98\%, 99.00\%).  For the same conditions at the age of 75, the estimated survival rate for enforcers is about 74.4\% (95\% CI: 61.4\%, 90.32\%) compared to non-enforcers estimate survival rate of 87.95\% (95\% CI: 83.09\%, 93.10\%).  
 
 <!-- ind surv lower upper time -->
 <!-- Non-Enforcer 0.9849056 0.9798140 0.9900238 50.00000 -->
@@ -393,7 +396,7 @@ However, a significant difference is observed in between enforcers and non-enfor
   \hline
  & $\beta$ & $e^{\beta}$ & s.e. & p-value \\ 
   \hline
-E-F TRUE & 0.17328 & 1.18920 & 0.28884 & 0.54856 \\ 
+  E-F TRUE & 0.17328 & 1.18920 & 0.28884 & 0.54856 \\ 
   GP & -0.00059 & 0.99941 & 0.00022 & 0.00815 \\ 
   Ht & -0.04484 & 0.95615 & 0.04430 & 0.31144 \\ 
   Wt & 0.02274 & 1.02300 & 0.00652 & 0.00049 \\ 
@@ -472,88 +475,91 @@ ggplot(aes(x = time,y = surv, color = enforcer), data = ggdat) + geom_path() + g
 ```
 
 
-Talk about the conditioning on death stuff.  
+<!-- Talk about the conditioning on death stuff.   -->
 
-Age difference statement in Popkin is over stated.  
-
+<!-- Age difference statement in Popkin is over stated.   -->
 
 ## Continuous predictors for fights and penalty minutes
-```{r}
+In @Popkin2023, they dichotomized fights and penalty minutes to define enforcers versus non-enforcers using chosen cutoffs both of these metrics.  In the previous, section we used performed a survival analysis using their definitions enforcers.  Here, in this section, we consider both of these metrics continuously rather than creating a binary variable.  Tables \ref{tab:TotalFights} and \ref{tab:PIM} show these results.  As before, total fights is found to be not significantly related to survival times of hockey players (p-value: 0.78684.  Penalty minutes is also found to not be significatly related to survival times (p-value: 0.05896).  
+
+% latex table generated in R 4.4.0 by xtable 1.8-4 package
+% Mon May 19 10:11:37 2025
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrr}
+  \hline
+ & $\beta$ & $e^{\beta}$ & s.e. & p-value \\ 
+  \hline
+Total.Fights & 0.00078 & 1.00078 & 0.00288 & 0.78684 \\ 
+  GP.x & -0.00058 & 0.99942 & 0.00023 & 0.01361 \\ 
+  Ht & -0.04495 & 0.95605 & 0.04430 & 0.31022 \\ 
+  Wt & 0.02288 & 1.02315 & 0.00655 & 0.00047 \\ 
+  DOB.Year & -0.01760 & 0.98256 & 0.00820 & 0.03188 \\ 
+  Pos2D & -0.36309 & 0.69552 & 0.17422 & 0.03715 \\ 
+  Pos2W & -0.25742 & 0.77304 & 0.15936 & 0.10623 \\ 
+   \hline
+\end{tabular}
+\caption{Total Fights \label{tab:TotalFights}}
+\end{table}
+
+% latex table generated in R 4.4.0 by xtable 1.8-4 package
+% Mon May 19 10:09:36 2025
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrr}
+  \hline
+ & $\beta$ & $e^{\beta}$ & s.e. & p-value \\ 
+  \hline
+PIM.GP\_numeric & 0.13043 & 1.13931 & 0.06906 & 0.05896 \\ 
+  GP.x & -0.00057 & 0.99943 & 0.00021 & 0.00742 \\ 
+  Ht & -0.04259 & 0.95830 & 0.04425 & 0.33580 \\ 
+  Wt & 0.02045 & 1.02066 & 0.00665 & 0.00210 \\ 
+  DOB.Year & -0.01729 & 0.98286 & 0.00825 & 0.03620 \\ 
+  Pos2D & -0.40828 & 0.66479 & 0.17626 & 0.02054 \\ 
+  Pos2W & -0.29326 & 0.74583 & 0.16045 & 0.06759 \\ 
+   \hline
+\end{tabular}
+\caption{PIM \label{tab:PIM}}
+\end{table}
+
+## Continuous predictors for fights and penalty minutes controlling for North American vs Other. 
+
+@Popkin2023 controls for games played, height, weight, data of birth, and position.  However, many previous works have noted substantial differences in player behavior based on country of origin. (Note: Fighting in NHL is a 5 minute penalty, Fighting internationally is a 10 minute penalty)  @GrossmanAndHines1996 finds that North American players accumulate a significantly higher number of penalty minutes than  European players using data from the 1995-96 season.  @GeeAndLeith2007 reach a similar conclusion using data from the 2003-04 season showing that North American players commit both more "aggressive" (e.g roughing, fighting, high sticking, etc.) penalties and more "non-aggressive" (hooking, holding, tripping, etc.) penalties. [MORE STUFF ON EUROPEAN VS NORTH AMERICA?]  @Popkin2023 does not consider this difference in players.  
+
+<!-- https://www.sciencedirect.com/science/article/pii/S146902920600063X -->
+<!-- https://pubmed.ncbi.nlm.nih.gov/8902034/ -->
+<!-- https://pubmed.ncbi.nlm.nih.gov/35549610/ -->
+
+Figure \@ref(fig:NAvsOther) shows the relationship between total career fights and penalty minutes per game for players of North American origin versus non North American players.  While there are many North American players with over 100 career fights, there are only a handful of non North American players over 100 career fights.  
+
+```{r fig:NAvsOther, echo = FALSE, fig.cap = "Penalty minutes per game vs total career fights for players from North America vs Other."}
 dat <- dat %>% mutate(northamerica = ifelse(Ctry %in% c("USA","CAN"),"North America","Other"))
 
-ggplot(aes(x = northamerica, y = PIM.GP_numeric), data = dat) + geom_boxplot()
+#ggplot(aes(x = northamerica, y = PIM.GP_numeric), data = dat) + geom_boxplot()
 
-ggplot(aes(x = northamerica, y = Total.Fights), data = dat) + geom_boxplot()
+#ggplot(aes(x = northamerica, y = Total.Fights), data = dat) + geom_boxplot()
 
 ggplot(aes(color = northamerica,x = PIM.GP_numeric, y = Total.Fights), data = dat) + geom_point() + facet_grid(~northamerica)
+
 ```
+#total fights continuous and NA
+```{r fig:estsurv:TF, echo = FALSE, fig.cap = "Estimated Survival curve for EF for defenders.  All other variables are fixed at their mean level (GP = 285.8, Ht = 72.7in, Wt = 197.03, and Year of birth 1974.5."}
+#coxphmod_Total.Fights <- coxph(Surv ~ Total.Fights  + GP.x + Ht + Wt + DOB.Year + Pos2, data = dat)
+coxphmod_Total.Fights <- coxph(Surv ~ Total.Fights + GP.x + Ht + Wt + DOB.Year + Pos2, data = dat)
+#xtable(summary(coxphmod_Total.Fights)$coef[,-4],digits = 5)
 
-
-
-```{r fig:estsurv, echo = FALSE, fig.cap = "Estimated Survival curve for EP for defenders.  All other variables are fixed at their mean level (GP = 285.8, Ht = 72.7in, Wt = 197.03, and Year of birth 1974.5."}
-dat <- dat %>% mutate(northamerica = ifelse(Ctry %in% c("USA","CAN"),"North America","Other"))
-coxphmod_PIM.GP_numeric <- coxph(Surv ~ PIM.GP_numeric + GP.x + Ht + Wt + DOB.Year + Pos2, data = dat)
-coxphmod_PIM.GP_numeric
-```
-
-Mike Lopez suggested looking at North America vs playuers from outside of North America.  
-Controlling for North America vs Other penalty minutes, penalty minutes per game is significant wuth a hazard ratio of 1.1880411. 
-```{r}
-coxphmod_PIM.GP_numeric <- coxph(Surv ~ PIM.GP_numeric + northamerica + GP.x + Ht + Wt + DOB.Year + Pos2, data = dat)
-coxphmod_PIM.GP_numeric
-```
-
-
-
-```{r}
-# summary(coxphmod_EP)
-# library(xtable)
-# xtable(summary(coxphmod_EP)$coef[,-4],digits = 5)
-# cox.zph(coxphmod_EP)
-
-
-newdataEP <-
-  with(dat, data.frame(PIM.GP_numeric = c(0.25,.5,3),
-                       northamerica = rep("North America",3),
-                       GP.x = rep(mean(GP.x), 3),
-                       Ht = rep(mean(Ht), 3),
-                       Wt = rep(mean(Wt), 3),
-                       DOB.Year = rep(mean(DOB.Year), 3),
-                       Pos2 = rep("D", 3))
-                       )
-#plot(survfit(coxphmod_EP, newdata = newdataEP), conf.int = TRUE, lty = c(1,2))
-
-
-nnn <- nrow(survfit(coxphmod_PIM.GP_numeric, newdata = newdataEP)$surv)
-ggdat <- data.frame(PIM.GP_numeric = c(rep(c(.5,3),each = nnn)),
-  surv = c(
-  survfit(coxphmod_PIM.GP_numeric, newdata = newdataEP)$surv[, 1],
-  survfit(coxphmod_PIM.GP_numeric, newdata = newdataEP)$surv[, 2]
-),
-  lower = c(
-  survfit(coxphmod_PIM.GP_numeric, newdata = newdataEP)$lower[, 1],
-  survfit(coxphmod_PIM.GP_numeric, newdata = newdataEP)$lower[, 2]
-),
-  upper = c(
-  survfit(coxphmod_PIM.GP_numeric, newdata = newdataEP)$upper[, 1],
-  survfit(coxphmod_PIM.GP_numeric, newdata = newdataEP)$upper[, 2]
-),
-time = rep(survfit(coxphmod_PIM.GP_numeric, newdata = newdataEP)$time,2)
-)
-ggplot(aes(x = time,y = surv, color = as.factor(PIM.GP_numeric)), data = ggdat) + geom_path() + geom_path(aes(x = time,y = lower, color = as.factor(PIM.GP_numeric)), lty = 3) + geom_path(aes(x = time,y = upper, color = as.factor(PIM.GP_numeric)), lty = 3) 
-```
-
-
-```{r fig:estsurv, echo = FALSE, fig.cap = "Estimated Survival curve for EF for defenders.  All other variables are fixed at their mean level (GP = 285.8, Ht = 72.7in, Wt = 197.03, and Year of birth 1974.5."}
-coxphmod_Total.Fights <- coxph(Surv ~ Total.Fights + northamerica + GP.x + Ht + Wt + DOB.Year + Pos2, data = dat)
-# summary(coxphmod_EP)
+coxphmod_Total.Fights_NA <- coxph(Surv ~ Total.Fights + northamerica + GP.x + Ht + Wt + DOB.Year + Pos2, data = dat)
+#coxphmod_Total.Fights
+#xtable(summary(coxphmod_Total.Fights_NA)$coef[,-4],digits = 5)
+# summary(coxphmod_Total.Fights_NA)
 # library(xtable)
 # xtable(summary(coxphmod_EP)$coef[,-4],digits = 5)
 # cox.zph(coxphmod_EP)
 
 
 newdataEF <-
-  with(dat, data.frame(Total.Fights = c(0,1,7),
+  with(dat, data.frame(Total.Fights = c(0,5,50),
+                       northamerica = c("North America"),
                        GP.x = rep(mean(GP.x), 3),
                        Ht = rep(mean(Ht), 3),
                        Wt = rep(mean(Wt), 3),
@@ -584,6 +590,171 @@ time = rep(survfit(coxphmod_Total.Fights, newdata = newdataEF)$time,3)
 )
 ggplot(aes(x = time,y = surv, color = as.factor(Total.Fights)), data = ggdat) + geom_path() + geom_path(aes(x = time,y = lower, color = as.factor(Total.Fights)), lty = 3) + geom_path(aes(x = time,y = upper, color = as.factor(Total.Fights)), lty = 3) 
 ```
+
+
+
+Table \@ref(tab:TotalFightsNA) shows the results of Cox proportional hazards model when an indicator for non-North American origin is included in the total fights model.  This indicator is significant (p-value: 0.00455) with an estimated hazard ratio of 1.66412 (95% CI: 1.1706, 2.3657) indicating that players of non North American origin have increased hazards indicating shorter survival times (WHY?!@?!?).   Including this control variable we find that total career fights is still not significant (p-value: 0.50672)
+
+% latex table generated in R 4.4.0 by xtable 1.8-4 package
+% Mon May 19 10:12:39 2025
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrr}
+  \hline
+ & $\beta$ & $e^{\beta}$ & s.e. & p-value \\ 
+  \hline
+Total.Fights & 0.00188 & 1.00188 & 0.00283 & 0.50672 \\ 
+  northamericaOther & 0.50930 & 1.66412 & 0.17948 & 0.00455 \\ 
+  GP.x & -0.00061 & 0.99939 & 0.00024 & 0.00937 \\ 
+  Ht & -0.04744 & 0.95367 & 0.04431 & 0.28430 \\ 
+  Wt & 0.02211 & 1.02235 & 0.00652 & 0.00070 \\ 
+  DOB.Year & -0.02058 & 0.97963 & 0.00829 & 0.01300 \\ 
+  Pos2D & -0.35004 & 0.70466 & 0.17374 & 0.04393 \\ 
+  Pos2W & -0.24782 & 0.78050 & 0.15904 & 0.11917 \\ 
+   \hline
+\end{tabular}
+\caption{Total Fights North America vs Other \label{tab:TotalFightsNA}}
+\end{table}
+
+```{r fig:estsurv:PIM, echo = FALSE, fig.cap = "Estimated Survival curve for EP for defenders.  All other variables are fixed at their mean level (GP = 285.8, Ht = 72.7in, Wt = 197.03, and Year of birth 1974.5."}
+dat <- dat %>% mutate(northamerica = ifelse(Ctry %in% c("USA","CAN"),"North America","Other"))
+
+#Penalty minutes are continuous
+coxphmod_PIM.GP_numeric <- coxph(Surv ~ PIM.GP_numeric + GP.x + Ht + Wt + DOB.Year + Pos2, data = dat)
+#coxphmod_PIM.GP_numeric
+#xtable(summary(coxphmod_PIM.GP_numeric)$coef[,-4],digits = 5)
+
+#coxphmod_Total_Fights <- coxph(Surv ~ Total.Fights + GP.x + Ht + Wt + DOB.Year + Pos2, data = dat)
+#coxphmod_Total_Fights
+
+
+```
+
+```{r}
+coxphmod_PIM.GP_numeric_NA <- coxph(Surv ~ PIM.GP_numeric + northamerica + GP.x + Ht + Wt + DOB.Year + Pos2, data = dat)
+summary(coxphmod_PIM.GP_numeric_NA)
+#xtable(summary(coxphmod_PIM.GP_numeric_NA)$coef[,-4],digits = 5)
+
+#coxphmod_PIM.GP_numeric <- coxph(Surv ~ PIM.GP_numeric * northamerica + GP.x + Ht + Wt + DOB.Year + Pos2, data = dat)
+#coxphmod_PIM.GP_numeric
+
+```
+We again repeat the analysis above (including indicator for non-North America as a control), but with penalty minutes instead of total career fights.  Table \@ref(tab:PIMNA) shows these results. The indicator for non North American was again found to be signigicant (p-value = 0.00141).  Unlike total fights, however, we find that when controlling for country of origin penalty minutes per game is significant (p-value = 0.01323) with an estimated hazard ratio of 1.1880 (95% CI: 1.0367, 1.3615). 
+
+Figure \@ref(fig:PIMNA) shows ......
+
+For North American players of average height, weight, date of birth, and defenders. Players with an an average of 0.5 penalty minutes per game have a survival rate of 98.76% (98.30%, 99.21%) at age 50 compared with a survival rate of 98.09% (97.30%, 98.90%).  Comparing 0.5 vs 3 average penalty minutes at age 75, the differences in survival are more pronounced.  A player with half a minute of penalty minutes per game has a survival probability 89.94% (85.62%, 94.48%) compared to a survival probability of 84.95% (78.11, 92.40%) for a 3 penalty minutes per game players.  
+  
+
+% latex table generated in R 4.4.0 by xtable 1.8-4 package
+% Mon May 19 10:14:02 2025
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrr}
+  \hline
+ & $\beta$ & $e^{\beta}$ & s.e. & p-value \\ 
+  \hline
+PIM.GP\_numeric & 0.17231 & 1.18804 & 0.06955 & 0.01323 \\ 
+  northamericaOther & 0.58056 & 1.78704 & 0.18181 & 0.00141 \\ 
+  GP.x & -0.00058 & 0.99942 & 0.00021 & 0.00718 \\ 
+  Ht & -0.04476 & 0.95622 & 0.04424 & 0.31167 \\ 
+  Wt & 0.01920 & 1.01938 & 0.00662 & 0.00371 \\ 
+  DOB.Year & -0.02071 & 0.97950 & 0.00835 & 0.01315 \\ 
+  Pos2D & -0.40731 & 0.66544 & 0.17573 & 0.02046 \\ 
+  Pos2W & -0.28722 & 0.75035 & 0.16007 & 0.07275 \\ 
+   \hline
+\end{tabular}
+\caption{PIM North America vs Other \label{tab:PIMNA}}
+\end{table}
+
+```{r fig:estsurv:PIMNA, echo = FALSE, fig.cap = "Estimated Survival curve for North American players comparing average penalty minutes per game of 0.5 to 3.  All other variables are fixed at their mean level (GP = 285.8, Ht = 72.7in, Wt = 197.03, and Year of birth 1974.5."}
+# summary(coxphmod_EP)
+# library(xtable)
+# xtable(summary(coxphmod_EP)$coef[,-4],digits = 5)
+# cox.zph(coxphmod_EP)
+
+
+newdataEP <-
+  with(dat, data.frame(PIM.GP_numeric = c(0.5,1,3),
+                       northamerica = rep("North America",3),
+                       GP.x = rep(mean(GP.x), 3),
+                       Ht = rep(mean(Ht), 3),
+                       Wt = rep(mean(Wt), 3),
+                       DOB.Year = rep(mean(DOB.Year), 3),
+                       Pos2 = rep("D", 3))
+                       )
+#plot(survfit(coxphmod_EP, newdata = newdataEP), conf.int = TRUE, lty = c(1,2))
+
+nnn <- nrow(survfit(coxphmod_PIM.GP_numeric_NA, newdata = newdataEP)$surv)
+ggdat <- data.frame(PIM.GP_numeric = c(rep(c(0.5,3),each = nnn)),
+  surv = c(
+  survfit(coxphmod_PIM.GP_numeric_NA, newdata = newdataEP)$surv[, 1],
+  survfit(coxphmod_PIM.GP_numeric_NA, newdata = newdataEP)$surv[, 3]
+),
+  lower = c(
+  survfit(coxphmod_PIM.GP_numeric_NA, newdata = newdataEP)$lower[, 1],
+  survfit(coxphmod_PIM.GP_numeric_NA, newdata = newdataEP)$lower[, 3]
+),
+  upper = c(
+  survfit(coxphmod_PIM.GP_numeric_NA, newdata = newdataEP)$upper[, 1],
+  survfit(coxphmod_PIM.GP_numeric_NA, newdata = newdataEP)$upper[, 3]
+),
+time = rep(survfit(coxphmod_PIM.GP_numeric_NA, newdata = newdataEP)$time,2)
+)
+
+ggdat %>% filter(time == 50)
+ggdat %>% filter(time > 74.98 & time < 75.02)
+
+ggplot(aes(x = time,y = surv, color = as.factor(PIM.GP_numeric)), data = ggdat) + geom_path() + geom_path(aes(x = time,y = lower, color = as.factor(PIM.GP_numeric)), lty = 3) + geom_path(aes(x = time,y = upper, color = as.factor(PIM.GP_numeric)), lty = 3) 
+```
+
+
+
+
+Mike Lopez suggested looking at North America vs playuers from outside of North America.  
+Controlling for North America vs Other penalty minutes, penalty minutes per game is significant wuth a hazard ratio of 1.1880411. 
+
+
+
+
+
+
+<!-- ```{r} -->
+<!-- newdataEP <- -->
+<!--   with(dat, data.frame(PIM.GP_numeric = rep(.5,2), -->
+<!--                        northamerica = c("North America","Other"), -->
+<!--                        GP.x = rep(mean(GP.x), 2), -->
+<!--                        Ht = rep(mean(Ht), 2), -->
+<!--                        Wt = rep(mean(Wt), 2), -->
+<!--                        DOB.Year = rep(mean(DOB.Year), 2), -->
+<!--                        Pos2 = rep("D", 2)) -->
+<!--                        ) -->
+<!-- #plot(survfit(coxphmod_EP, newdata = newdataEP), conf.int = TRUE, lty = c(1,2)) -->
+
+
+<!-- nnn <- nrow(survfit(coxphmod_PIM.GP_numeric, newdata = newdataEP)$surv) -->
+<!-- ggdat <- data.frame(northamerica = c(rep(c("North America","Other"),each = nnn)), -->
+<!--   surv = c( -->
+<!--   survfit(coxphmod_PIM.GP_numeric, newdata = newdataEP)$surv[, 1], -->
+<!--   survfit(coxphmod_PIM.GP_numeric, newdata = newdataEP)$surv[, 2] -->
+<!-- ), -->
+<!--   lower = c( -->
+<!--   survfit(coxphmod_PIM.GP_numeric, newdata = newdataEP)$lower[, 1], -->
+<!--   survfit(coxphmod_PIM.GP_numeric, newdata = newdataEP)$lower[, 2] -->
+<!-- ), -->
+<!--   upper = c( -->
+<!--   survfit(coxphmod_PIM.GP_numeric, newdata = newdataEP)$upper[, 1], -->
+<!--   survfit(coxphmod_PIM.GP_numeric, newdata = newdataEP)$upper[, 2] -->
+<!-- ), -->
+<!-- time = rep(survfit(coxphmod_PIM.GP_numeric, newdata = newdataEP)$time,2) -->
+<!-- ) -->
+<!-- ggplot(aes(x = time,y = surv, color = as.factor(northamerica)), data = ggdat) + geom_path() + geom_path(aes(x = time,y = lower, color = as.factor(northamerica)), lty = 3) + geom_path(aes(x = time,y = upper, color = as.factor(northamerica)), lty = 3)  -->
+<!-- ``` -->
+
+#Now for total fights
+
+
+
 
 
 ## Birth country
