@@ -386,7 +386,7 @@ However, a significant difference is observed between enforcers and non-enforcer
  
  <!-- Non-Enforcer 0.8795039 0.8308666 0.9309884 75.01096 -->
  <!-- Enforcer 0.7448857 0.6142941 0.9032394 75.01096 -->
-
+ddd
 
 <!-- % latex table generated in R 4.2.2 by xtable 1.8-4 package -->
 <!-- % Mon Feb 26 09:06:03 2024 -->
@@ -524,6 +524,15 @@ PIM.GP\_numeric & 0.13043 & 1.13931 & 0.06906 & 0.05896 \\
 
 ## Continuous predictors for fights and penalty minutes controlling for North American vs Other. 
 
+<!-- Englehardt, G. M. (1995). Fighting behavior and winning national hockey league games: A paradox. Perceptual and -->
+<!-- Motor Skills, 80, 416–418. -->
+<!-- Kirker, B., Tennenbaum, G., & Mattson, J. (2000). An investigation of the dynamics of aggression: Direct observation -->
+<!-- in ice hockey and basketball. Research Quarterly for Exercise and Sport, 71, 373–386. -->
+<!-- McCarthy, J. F., & Kelly, B. R. (1978a). Aggressive behavior and its effect on performance over time in ice hockey -->
+<!-- athletes: An archival study. International Journal of Sport Psychology, 9, 90–96. -->
+<!-- Wennberg, R. (2004). Collision frequency in elite hockey on North American versus International size rinks. Canadian -->
+<!-- Journal of Neurological Sciences, 31, 373–377 -->
+
 @Popkin2023 controls for games played, height, weight, data of birth, and position.  However, many previous works have noted substantial differences in player behavior based on country of origin. (Note: Fighting in NHL is a 5 minute penalty, Fighting internationally is a 10 minute penalty)  @GrossmanAndHines1996 finds that North American players accumulate a significantly higher number of penalty minutes than  European players using data from the 1995-96 season.  @GeeAndLeith2007 reach a similar conclusion using data from the 2003-04 season showing that North American players commit both more "aggressive" (e.g roughing, fighting, high sticking, etc.) penalties and more "non-aggressive" (hooking, holding, tripping, etc.) penalties. [MORE STUFF ON EUROPEAN VS NORTH AMERICA?]  @Popkin2023 does not consider this difference in players.  
 
 <!-- https://www.sciencedirect.com/science/article/pii/S146902920600063X -->
@@ -543,6 +552,9 @@ ggplot(aes(color = northamerica,x = PIM.GP_numeric, y = Total.Fights), data = da
 
 ```
 #total fights continuous and NA
+
+
+
 ```{r fig:estsurv:TF, echo = FALSE, fig.cap = "Estimated Survival curve for EF for defenders.  All other variables are fixed at their mean level (GP = 285.8, Ht = 72.7in, Wt = 197.03, and Year of birth 1974.5."}
 #coxphmod_Total.Fights <- coxph(Surv ~ Total.Fights  + GP.x + Ht + Wt + DOB.Year + Pos2, data = dat)
 coxphmod_Total.Fights <- coxph(Surv ~ Total.Fights + GP.x + Ht + Wt + DOB.Year + Pos2, data = dat)
